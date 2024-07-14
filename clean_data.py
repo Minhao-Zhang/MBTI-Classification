@@ -1,6 +1,6 @@
 import pandas as pd 
 DATA_PATH = "full_pull/full_pull_v20000000000"
-OUTPUT_PATH = "cleaned_data/fp_"
+OUTPUT_PATH = "cleaned_data/cleaned_"
 
 def clean_data(index: str):
     
@@ -16,9 +16,15 @@ def clean_data(index: str):
 
     # make everything lowercase 
     data['body'] = data['body'].str.lower()
-
+    
+    # remove any markdown-style url from the body column but keep the text
+    data['body'] = data['body'].replace(r'\[(.*?)\]\(.*?\)', r'\1', regex=True)
+    
     # remove any url from the body column 
     data['body'] = data['body'].replace(r'http\S+', '', regex=True)
+
+    # replace all line breaks with space
+    data['body'] = data['body'].replace(r'\r?\n', ' ', regex=True)
 
     # remove any post with non-english characters
     data = data[data['body'].str.contains(r'[^\x00-\x7F]+') == False]
@@ -26,11 +32,8 @@ def clean_data(index: str):
     # remove any reddit like link from the body column like r/ or u/
     data['body'] = data['body'].replace(r'[r|u]\/\S+', '', regex=True)
 
-    # remove any punctuation from the body column
-    data['body'] = data['body'].replace(r'[^\w\s]', '', regex=True)
-    
-    # replace all line breaks with space
-    data['body'] = data['body'].replace(r'\n', ' ', regex=True)
+    # remove any punctuation other than ! and ?
+    data['body'] = data['body'].replace(r'[^\w\s!?]', '', regex=True)
     
     # remove any rows with 20 < body length < 3000
     data = data[data['body'].str.len() > 20]

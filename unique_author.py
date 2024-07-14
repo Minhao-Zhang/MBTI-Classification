@@ -2,7 +2,7 @@ import pandas as pd
 
 # read in all the data 
 indexes = [str(i).zfill(2) for i in range(18)]
-data = [pd.read_csv("cleaned_data/fp_" + index + ".csv") for index in indexes]
+data = [pd.read_csv("cleaned_data/cleaned_" + index + ".csv") for index in indexes]
 
 # append all the data into one dataframe 
 data = pd.concat(data)
@@ -23,5 +23,5 @@ unique_data = unique_data[unique_data["author"].isin(authors.index)]
 data = data[data["author"].isin(unique_data["author"])]
 
 # save to file
-unique_data.to_csv("data/unique_author_mbti.csv", index=False)
-data.to_csv("data/unique_author_data.csv", index=False)
+unique_data.to_csv("data/author_post.csv", index=False)
+data.to_csv("data/unique_author.csv", index=False)

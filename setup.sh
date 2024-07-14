@@ -1,3 +1,4 @@
+sudo apt-get install aria2
 mkdir -p full_pull
 mkdir -p cleaned_data 
 mkdir -p data
