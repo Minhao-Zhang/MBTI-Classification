@@ -21,7 +21,7 @@ def clean_data(index: str):
     data['body'] = data['body'].replace(r'\[(.*?)\]\(.*?\)', r'\1', regex=True)
     
     # remove any url from the body column 
-    data['body'] = data['body'].replace(r'http\S+', '', regex=True)
+    data['body'] = data['body'].replace(r'(http[s]?://|www\.)\S+', '', regex=True)
 
     # replace all line breaks with space
     data['body'] = data['body'].replace(r'\r?\n', ' ', regex=True)
@@ -35,9 +35,9 @@ def clean_data(index: str):
     # remove any punctuation other than ! and ?
     data['body'] = data['body'].replace(r'[^\w\s!?]', '', regex=True)
     
-    # remove any rows with 20 < body length < 3000
-    data = data[data['body'].str.len() > 20]
-    data = data[data['body'].str.len() < 3000]
+    # remove any rows with 20 <= body length <= 3000
+    data = data[data['body'].str.len() >= 20]
+    data = data[data['body'].str.len() <= 3000]
 
     # keep only author, body, mbti column 
     data = data[['author', 'body', 'mbti']]

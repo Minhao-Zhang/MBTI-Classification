@@ -23,5 +23,5 @@ unique_data = unique_data[unique_data["author"].isin(authors.index)]
 data = data[data["author"].isin(unique_data["author"])]
 
 # save to file
-unique_data.to_csv("data/author_post.csv", index=False)
-data.to_csv("data/unique_author.csv", index=False)
+unique_data.to_csv("data/unique_author.csv", index=False)
+data.to_csv("data/reddit_post.csv", index=False)
