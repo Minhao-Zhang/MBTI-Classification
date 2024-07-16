@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import nltk
 from gensim.models import Word2Vec
 import pickle
 
@@ -35,11 +34,27 @@ for file in all_files:
         
         # Drop the original tokens column
         tokenized_chunk = tokenized_chunk.drop(columns=['tokens', 'body'])
+        float_list_df = pd.DataFrame(tokenized_chunk['vector'].tolist(), columns=[f'feature_{i}' for i in range(len(tokenized_chunk['vector'][0]))])
+        expanded_df = pd.concat([tokenized_chunk[['author', 'mbti']], float_list_df], axis=1)
         
         # Append the transformed chunk to the new dataset
-        new_dataset = pd.concat([new_dataset, tokenized_chunk], ignore_index=True)
+        new_dataset = pd.concat([new_dataset, expanded_df], ignore_index=True)
         print(f'Processed {file}')
-        
-        
-        
-new_dataset.to_pickle('pickled/word2vec_dataset.pkl')
+
+# ERROR
+# After running the script, there will be a weird behavior of 
+# repeated rows on line 1M. The reason for this is still unknown.
+# This might have happened in previous processing steps.
+# To fix this, we can simply drop the duplicates.
+new_dataset.drop(index=1000000, inplace=True)
+
+# split the data into 4 parts and save them
+new_dataset_1 = new_dataset.iloc[:2500000]
+new_dataset_2 = new_dataset.iloc[2500000:5000000]
+new_dataset_3 = new_dataset.iloc[5000000:7500000]
+new_dataset_4 = new_dataset.iloc[7500000:]
+
+new_dataset_1.to_csv('data/word2vec_data_1.csv', index=False)
+new_dataset_2.to_csv('data/word2vec_data_2.csv', index=False)
+new_dataset_3.to_csv('data/word2vec_data_3.csv', index=False)
+new_dataset_4.to_csv('data/word2vec_data_4.csv', index=False)
