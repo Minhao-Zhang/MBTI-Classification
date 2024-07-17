@@ -7,7 +7,7 @@ We will be using the MBTI indicator as our target.
 
 Please see the detailed desciption [here](./data_summary.md)
 
-## Get Started 
+## Data Cleaning
 
 If you want to process the data yourself, you can run 
 
@@ -21,5 +21,18 @@ You can start the data cleaning by running
     
 ```bash
 python3 clean_data.py
-python3 unique_users.py
+python3 remove_duplicate.py
 ```
+
+## Pre-Processing 
+
+As the nature of chat messages, the length of each message varies a lot. 
+A very short message may not contain enough information to predict someone's personality. 
+Thus, I decided to combine shorter messages into longer ones with a minimum length of 300 characters (including spaces). 
+
+You can run the following command to combine the data. 
+
+```bash
+python3 combine_short_text.py
+```
+

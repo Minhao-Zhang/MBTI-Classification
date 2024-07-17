@@ -22,6 +22,15 @@ unique_data = unique_data[unique_data["author"].isin(authors.index)]
 # keep rows with unique author and mbti pairs
 data = data[data["author"].isin(unique_data["author"])]
 
+# After these steps, you will get about 19.6M rows of data.
+# Unfortunately, many of them are still duplicates.
+# We will remove duplicates by checking all columns
+data = data.drop_duplicates()
+# remove any post by Daenyx due to inappropriate content
+data = data[data['author'] != 'Daenyx']
+# remove Daenyx from unique_author 
+unique_data = unique_data[unique_data['author'] != 'Daenyx']
+
 # save to file
-unique_data.to_csv("data/unique_author.csv", index=False)
 data.to_csv("data/reddit_post.csv", index=False)
+unique_data.to_csv("data/unique_author.csv", index=False)
