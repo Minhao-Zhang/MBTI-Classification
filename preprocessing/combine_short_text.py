@@ -1,5 +1,8 @@
 import pandas as pd 
-data = pd.read_csv('data/reddit_post.csv')
+
+DATA_PATH = "../data/"
+
+data = pd.read_csv(f'{DATA_PATH}reddit_post.csv')
 
 # Function to concatenate body strings of each author
 def concatenate_bodies(group):
@@ -34,4 +37,4 @@ for author, group in data.groupby('author'):
 new_df = pd.DataFrame(new_rows)
 
 # save it to a new CSV file
-new_df.to_csv('data/reddit_post_combined.csv', index=False)
+new_df.to_csv(f'{DATA_PATH}reddit_post_combined.csv', index=False)

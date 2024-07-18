@@ -3,7 +3,8 @@ import nltk
 from nltk.tokenize import word_tokenize
 import pickle
 
-DATASET = 'data/reddit_post_combined.csv'
+DATASET = '../data/reddit_post_combined.csv'
+PICKLE_PATH = './tmp/'
 
 # nltk.download('punkt')
 
@@ -11,7 +12,7 @@ DATASET = 'data/reddit_post_combined.csv'
 def process_and_save_chunk(chunk, chunk_index):
     chunk['tokens'] = chunk['body'].apply(word_tokenize)
     chunk = chunk.drop(columns=['body'])
-    with open(f'pickled/tokenized_chunk_{chunk_index}.pkl', 'wb') as f:
+    with open(f'{PICKLE_PATH}tokenized_chunk_{chunk_index}.pkl', 'wb') as f:
         pickle.dump(chunk, f)
     del chunk  # Free memory
 

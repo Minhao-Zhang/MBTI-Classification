@@ -1,8 +1,11 @@
 import pandas as pd 
 
+CLEAN_DATA_PATH = "../full_pull/"
+DATA_PATH = "../data/"
+
 # read in all the data 
 indexes = [str(i).zfill(2) for i in range(18)]
-data = [pd.read_csv("cleaned_data/cleaned_" + index + ".csv") for index in indexes]
+data = [pd.read_csv(f"{CLEAN_DATA_PATH}cleaned_" + index + ".csv") for index in indexes]
 
 # append all the data into one dataframe 
 data = pd.concat(data)
@@ -32,5 +35,5 @@ data = data[data['author'] != 'Daenyx']
 unique_data = unique_data[unique_data['author'] != 'Daenyx']
 
 # save to file
-data.to_csv("data/reddit_post.csv", index=False)
-unique_data.to_csv("data/unique_author.csv", index=False)
+data.to_csv(f"{DATA_PATH}reddit_post.csv", index=False)
+unique_data.to_csv(f"{DATA_PATH}unique_author.csv", index=False)

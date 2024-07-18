@@ -5,7 +5,7 @@ We will be using the MBTI indicator as our target.
 
 ## Data Curation 
 
-Please see the detailed desciption [here](./data_summary.md)
+Please see the detailed desciption [here](./preprocessing/README.md)
 
 ## Data Cleaning
 
