@@ -19,7 +19,7 @@ def document_vector(doc, model):
 model = Word2Vec.load("models/word2vec.model")
 
 # List of all tokenized chunk files
-all_files = [f'pickled/tokenized_chunk_{i}.pkl' for i in range(10)]
+all_files = [f'pickled/tokenized_chunk_{i}.pkl' for i in range(6)]
 
 # Create an empty DataFrame to hold the new dataset
 new_dataset = pd.DataFrame()
@@ -49,7 +49,7 @@ for file in all_files:
 new_dataset.drop(index=1000000, inplace=True)
 
 # spplit the data into 10 parts each with 2M rows with last one having whatever is left 
-for i in range(9):
-    small_df = new_dataset.iloc[i*2000000:(i+1)*2000000]
+for i in range(6):
+    small_df = new_dataset.iloc[i*900000:(i+1)*900000]
     with open(f'pickled/word2vec_{i}.pkl', 'wb') as f:
         pickle.dump(small_df, f)

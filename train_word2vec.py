@@ -8,7 +8,7 @@ def load_tokenized_chunk(file_path):
     return chunk['tokens'].tolist()
 
 # List of all tokenized chunk files
-all_files = [f'pickled/tokenized_chunk_{i}.pkl' for i in range(10)]
+all_files = [f'pickled/tokenized_chunk_{i}.pkl' for i in range(6)]
 
 # Initialize Word2Vec model with the first chunk
 first_chunk_tokens = load_tokenized_chunk(all_files[0])

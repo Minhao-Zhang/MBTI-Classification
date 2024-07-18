@@ -3,3 +3,5 @@ pandas
 scikit-learn
 jupyter
 matplotlib
+gensim 
+nltk
