@@ -3,6 +3,8 @@ cleaned_data/
 data/
 pickled/
 models/
+llm_data/
+ml_data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
