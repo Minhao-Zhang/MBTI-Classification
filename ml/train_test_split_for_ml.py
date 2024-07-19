@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 PICKLE_PATH = "./tmp/"
-DATA_PATH = "./data/"
+DATA_PATH = "./data/200/"
 
 all_files = [f'{PICKLE_PATH}word2vec_{i}.pkl' for i in range(6)]
 

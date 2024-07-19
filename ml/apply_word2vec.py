@@ -4,7 +4,7 @@ from gensim.models import Word2Vec
 import pickle
 
 PICKLE_PATH = "./tmp/"
-MODEL_PATH = "./models/"
+MODEL_PATH = "./models/word2vec200/"
 
 # Function to load tokenized chunks from disk
 def load_tokenized_chunk(file_path):
