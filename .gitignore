@@ -5,6 +5,8 @@ pickled/
 models/
 llm_data/
 ml_data/
+tmp/
+information-14-00217-v2.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
