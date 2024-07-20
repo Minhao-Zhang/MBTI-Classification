@@ -37,8 +37,25 @@ I also provided a dataset with unique authors and their MBTI types.
 
 Some summary statistics of the dataset are as follows:
 
-![MBTI Distributions](./figs/mbti_distribution.png)
+![MBTI Distributions](../figs/mbti_distribution.png)
 
-![MBTI Each Category](./figs/mbti_detail.png)
 
-![Numer of posts per author](./figs/post_per_author.png)
+## Preparation for Modeling
+
+As the nature of online chat, the text length varies a lot. 
+A very short text might not contain enough information to predict the MBTI type.
+Thus, I concatenated shorter posts from the same author to make a longer post. 
+Detailed steps can be found in [combine_short_text.py](./combine_short_text.py)
+
+After that, this could be considered to be the final dataset. 
+
+Based on the final dataset, we can assume a dummy classifier to predict the MBTI type.
+It will always predict the most frequent MBTI type. 
+These are the baseline metrics for the dataset. 
+
+| Dimension | Accuracy | F1 Score |
+|-----------|----------|----------|
+|  I & E  | 0.788652 | 0.881840 |
+|  N & S  | 0.924903 | 0.960987 |
+|  T & F  | 0.535982 | 0.697901 |
+|  J & P  | 0.598545 | 0.748862 |

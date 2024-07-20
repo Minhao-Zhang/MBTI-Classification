@@ -1,6 +1,6 @@
 import pandas as pd 
-DATA_PATH = "full_pull/full_pull_v20000000000"
-OUTPUT_PATH = "cleaned_data/cleaned_"
+DATA_PATH = "../full_pull/full_pull_v20000000000"
+OUTPUT_PATH = "../full_pull/cleaned_"
 
 def clean_data(index: str):
     
