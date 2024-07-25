@@ -32,7 +32,6 @@ def split_2000(data: pd.DataFrame):
             'mbti': row['mbti']
         })
     temp_df = pd.DataFrame(new_rows)
-    print(temp_df.describe())
     data = pd.concat([data, temp_df])
     return data
 data = split_2000(data)
@@ -60,7 +59,6 @@ def split_1400(data: pd.DataFrame):
             'mbti': row['mbti']
         })
     temp_df = pd.DataFrame(new_rows)
-    print(temp_df.describe())
     data = pd.concat([data, temp_df])
     return data
 data = split_1400(data)
@@ -88,7 +86,6 @@ def split_1000(data: pd.DataFrame):
             'mbti': row['mbti']
         })
     temp_df = pd.DataFrame(new_rows)
-    print(temp_df.describe())
     data = pd.concat([data, temp_df])
     return data
 data = split_1000(data)
@@ -142,6 +139,7 @@ def trim_body(data: pd.DataFrame, n: int):
 new_df = trim_body(new_df, 1000)
 
 new_df = new_df[new_df['body'].str.len() >= 700]
+new_df = new_df[new_df['body'].str.len() <= 1000]
 # plot the histogram of the length of body in new data bin=50
 
 print(new_df.describe())
