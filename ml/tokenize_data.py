@@ -3,10 +3,10 @@ import nltk
 from nltk.tokenize import word_tokenize
 import pickle
 
-DATASET = '../data/reddit_post_combined.csv'
+DATASET = '../data/train_test_split/reddit_post_cleaned.csv'
 PICKLE_PATH = './tmp/'
 
-# nltk.download('punkt')
+nltk.download('punkt')
 
 # Function to process and save chunks
 def process_and_save_chunk(chunk, chunk_index):
@@ -19,7 +19,7 @@ def process_and_save_chunk(chunk, chunk_index):
 # Calculate the number of rows in the full dataset
 total_rows = sum(1 for _ in open(DATASET)) - 1  # Minus 1 for the header row 
 print(f'Total rows in dataset: {total_rows}')
-chunk_size = 900000  # Adjust this value based on your system's memory
+chunk_size = 800000  # Adjust this value based on your system's memory
 num_chunks = total_rows // chunk_size + (1 if total_rows % chunk_size != 0 else 0)
 
 # Process dataframe in chunks

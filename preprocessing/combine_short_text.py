@@ -1,6 +1,6 @@
 import pandas as pd 
 
-DATA_PATH = "../data/"
+DATA_PATH = "../data/temp/"
 
 data = pd.read_csv(f'{DATA_PATH}reddit_post.csv')
 
@@ -140,7 +140,6 @@ new_df = trim_body(new_df, 1000)
 
 new_df = new_df[new_df['body'].str.len() >= 700]
 new_df = new_df[new_df['body'].str.len() <= 1000]
-# plot the histogram of the length of body in new data bin=50
 
 print(new_df.describe())
 

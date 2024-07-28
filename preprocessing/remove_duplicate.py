@@ -1,11 +1,10 @@
 import pandas as pd 
 
-CLEAN_DATA_PATH = "../full_pull/"
-DATA_PATH = "../data/"
+DATA_PATH = "../data/temp/"
 
 # read in all the data 
 indexes = [str(i).zfill(2) for i in range(18)]
-data = [pd.read_csv(f"{CLEAN_DATA_PATH}cleaned_" + index + ".csv") for index in indexes]
+data = [pd.read_csv(f"{DATA_PATH}cleaned_" + index + ".csv") for index in indexes]
 
 # append all the data into one dataframe 
 data = pd.concat(data)
