@@ -56,7 +56,7 @@ A very short message may not contain enough information to predict someone's per
 Thus, I decided to combine shorter messages into longer ones with a minimum length of 700 characters (including spaces) and maximum 1000 characters. 
 Detailed steps can be found in [combine_short_text.py](./preprocessing/combine_short_text.py)
 
-Though counting by characters are a effective way to create a balanced dataset, it might introduce some problem when we try to use LLMs' tokenization. 
+Though counting by characters are an effective way to create a balanced dataset, it might introduce some problem when we try to use LLMs' tokenization. 
 As the tokenization is roughly based on words, the number of tokens in a sentence might not be the same as the number of characters. 
 Thus, I decided to further process the data into a narrower range of word length. 
 Detailed steps can be found in [evenout_word_length.py](./preprocessing/evenout_word_length.py) and the dataset can be found on [huggingface](https://huggingface.co/datasets/minhaozhang/mbti). 
@@ -93,7 +93,7 @@ This means that their model is not better than a simple majority classifier.
 I followed the same approach as Ryan et al. (2023) with my own cleaned and much larger dataset. 
 I used mostly the same data pre-processing strategy as them, but I used several gradient boosting classifier such as CatBoost, XGBoost, and LightGBM. 
 Though my data distribution is different from theirs, the result did not outperform theirs. 
-My best F1 score is almost the same as the majority classifier within the tolerance of 0.01. 
+My best F1 score is slightly lower than the majority classifier. 
 The detailed training and evaluation can be found in [train_model.ipynb](./ml/train_model.ipynb)
 
 These unseccessful results might be due to the nature of the MBTI classification or it might be the limitation of the traditional machine learning approach. 
@@ -102,11 +102,10 @@ Thus, I will try to employ the large language models to see if we can improve th
 
 ## Large Language Models
 
-Here, I decided to fine tune the large language models to predict someone's MBTI type. 
 I will be using the recently released [Phi-3](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/) model from Microsoft. 
 This model recently opened up its fine tuning on Azure AI Studio, but I decided to use the Huggingface's [transformers](https://huggingface.co/transformers/) library to fine tune the model as it is more flexible. 
 
-To get started, I simply followed the turotial on [text classification](https://huggingface.co/docs/transformers/en/tasks/sequence_classification). 
+To get started, I simply followed the turotial on [sequence classification](https://huggingface.co/docs/transformers/en/tasks/sequence_classification). 
 This tutorial works through the fine tuning of a model using Google Bert. 
 It also provides a structure on how the code should look like when fine tuning a model. 
 Different from the tutorial, I will be using the Phi-3 model instead of Bert which is a much newer model. 
@@ -117,6 +116,9 @@ Thus, I used a cloud service with one A100 GPU to fine tune the model.
 Though the machine with A100 GPU is much better than my PC, strategies like gredient accumulation and gradient checkpointing are still needed to fine tune the model. 
 I also used a special optimizer to decrease GPU memory usage. 
 All the strategies are learned from [transformers](https://huggingface.co/docs/transformers/perf_train_gpu_one) tutorials. 
+To my knowledge, you can only use some of the strategies in the link mentioned above. 
+For some reason, when I use `bf16=True` to train the model, the predictions are all nan. 
+The reason is still unknown to me.
 
 
 ## References

@@ -1,11 +1,12 @@
 import pickle 
 import pandas as pd
-from sklearn.model_selection import train_test_split
+import numpy as np
 
 PICKLE_PATH = "./tmp/"
-DATA_PATH = "./data/200/"
+DATA_PATH = "./data/"
+SPLIT_PATH = "../data/train_test_split/"
 
-all_files = [f'{PICKLE_PATH}word2vec_{i}.pkl' for i in range(6)]
+all_files = [f'{PICKLE_PATH}word2vec_{i}.pkl' for i in range(4)]
 
 new_dataset = pd.DataFrame()
 for file in all_files:
@@ -16,9 +17,13 @@ for file in all_files:
         del tokenized_chunk
 
 new_dataset.drop(columns=['author'], inplace=True)
-print("Dropped author")
-train_data, test_data = train_test_split(new_dataset, test_size=0.2, stratify=new_dataset['mbti'], random_state=42)
-print("Splitted data")
+
+train_indices = np.load(f'{SPLIT_PATH}train_indices.npy')
+test_indices = np.load(f'{SPLIT_PATH}test_indices.npy')
+
+train_data = new_dataset.iloc[train_indices]
+test_data = new_dataset.iloc[test_indices]
+
 del new_dataset
 
 with open(f'{DATA_PATH}test.pkl', 'wb') as f:
@@ -28,11 +33,7 @@ with open(f'{DATA_PATH}test.pkl', 'wb') as f:
 
 del test_data
 
-num = train_data.shape[0]
-num = num // 5
-
-for i in range(4):
-    with open(f'{DATA_PATH}train_{i}.pkl', 'wb') as f:
-        pickle.dump(train_data.iloc[i*num:(i+1)*num], f)
-with open(f'{DATA_PATH}train_4.pkl', 'wb') as f:
-    pickle.dump(train_data.iloc[4*num:], f)
+with open(f'{DATA_PATH}train.pkl', 'wb') as f:
+    pickle.dump(train_data, f)
+    print("Saved train")
+    print(train_data.iloc[:10])
