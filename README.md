@@ -3,9 +3,9 @@
 Classifying someone's MBTI type based on their text data.
 
 ## Table of Contents
-1. [Data Preparation](#datapreparation)
-2. [Machine Learning Approach](#machinelearningapproach)
-3. [Large Language Models Approach](#largelanguagemodelsapproach)
+1. [Data Preparation](#data-preparation)
+2. [Machine Learning Approach](#machine-learning-approach)
+3. [Large Language Models Approach](#large-language-models-approach)
 
 ## Data Preparation
 
