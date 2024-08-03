@@ -1,7 +1,11 @@
 # MBTI Classifier 
 
-This project is aimed to use large language models and online chat message to predict someone's personality. 
-We will be using the MBTI indicator as our target. 
+Classifying someone's MBTI type based on their text data.
+
+## Table of Contents
+1. [Data Preparation](#datapreparation)
+2. [Machine Learning Approach](#machinelearningapproach)
+3. [Large Language Models Approach](#largelanguagemodelsapproach)
 
 ## Data Preparation
 
@@ -49,7 +53,7 @@ I also provided a dataset with unique authors and their MBTI types.
 
 At this point, this can be considered as a foundation dataset for the MBTI classification. You can find the dataset on [Kaggle](https://www.kaggle.com/datasets/minhaozhang1/reddit-mbti-dataset).
 
-## Pre-Processing 
+### Pre-Processing 
 
 Due to the nature of chat messages, the length of each message varies a lot. 
 A very short message may not contain enough information to predict someone's personality. 
@@ -66,15 +70,15 @@ Detailed steps can be found in [evenout_word_length.py](./preprocessing/evenout_
 As we have obtained our final dataset, we can explore the distribution of the MBTI types in the dataset. 
 We can use a majority classifier to see the baseline performance. 
 
-| Type  | Accuracy     | F1 Score     |
-|-------|--------------|--------------|
-| E-I   | 0.78858      | 0.88179      |
-| N-S   | 0.92603      | 0.96160      |
-| F-T   | 0.53863      | 0.70014      |
-| J-P   | 0.59189      | 0.74363      |
+| Type | Accuracy | F1 Score |
+| ---- | -------- | -------- |
+| E-I  | 0.78858  | 0.88179  |
+| N-S  | 0.92603  | 0.96160  |
+| F-T  | 0.53863  | 0.70014  |
+| J-P  | 0.59189  | 0.74363  |
 
 
-## Traditional Machine Learning Approach 
+## Machine Learning Approach 
 
 ### Previous Work
 
@@ -100,7 +104,9 @@ These unseccessful results might be due to the nature of the MBTI classification
 Thus, I will try to employ the large language models to see if we can improve the performance. 
 
 
-## Large Language Models
+## Large Language Models Approach
+
+### Get Started
 
 I will be using the recently released [Phi-3](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/) model from Microsoft. 
 This model recently opened up its fine tuning on Azure AI Studio, but I decided to use the Huggingface's [transformers](https://huggingface.co/transformers/) library to fine tune the model as it is more flexible. 
@@ -109,16 +115,37 @@ To get started, I simply followed the turotial on [sequence classification](http
 This tutorial works through the fine tuning of a model using Google Bert. 
 It also provides a structure on how the code should look like when fine tuning a model. 
 Different from the tutorial, I will be using the Phi-3 model instead of Bert which is a much newer model. 
-This introduces a GPU memory problem as the Phi-3 model is much larger than Bert. 
+This introduced some computation power requirement. 
 Even with the smallest [Phi-3-mini-4k-instruct](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct) model, it is just infeasible to fine tune on my PC. 
 Thus, I used a cloud service with one A100 GPU to fine tune the model. 
 
-Though the machine with A100 GPU is much better than my PC, strategies like gredient accumulation and gradient checkpointing are still needed to fine tune the model. 
-I also used a special optimizer to decrease GPU memory usage. 
+### Reducing GPU Memory Usage
+
+Though the machine with A100 GPU is much better than my PC, I still need to use some strategies to decrease the vRAM usage. 
+Using a tool like [Model Memory Estimator](https://huggingface.co/spaces/hf-accelerate/model-memory-usage) from Huggingface, the model with the `Adam` optimizer and dtype `float32` will require 57GB of peak vRAM. 
+Combining with the space for the data, it will exceed the 80GB vRAM of the single A100 GPU. 
+Thus, certain strategies need to be employed to reduce the vRAM usage. 
+
 All the strategies are learned from [transformers](https://huggingface.co/docs/transformers/perf_train_gpu_one) tutorials. 
-To my knowledge, you can only use some of the strategies in the link mentioned above. 
-For some reason, when I use `bf16=True` to train the model, the predictions are all nan. 
-The reason is still unknown to me.
+
+| Method/tool                            | Methods I Employed                                |
+| -------------------------------------- | ------------------------------------------------- |
+| Batch size choice                      | Yes, to reduce memory usage                       |
+| Gradient accumulation                  | Yes, to effectively increase the batch size       |
+| Gradient checkpointing                 | No, because decrease training speed by 20%        |
+| Mixed precision training               | Yes, used `tf32` to increse training speed        |
+| torch_empty_cache_steps                | No, because decrease training speed by 10%        |
+| Optimizer choice                       | Yes, used `adamw_bnb_8bit` to reduce memory usage |
+| Data preloading                        | Yes, by default                                   |
+| DeepSpeed Zero                         | No, because could not set up enviornment          |
+| torch.compile                          | No, becasue could not set up enviornment          |
+| Parameter-Efficient Fine Tuning (PEFT) | No, because could not set up enviornment          |
+
+One thing interesting is that when I tried to use `bf16` dtype to reduce a bit more memory, the model's loss will be `nan`. 
+I found a post with the exact problem I have but with a different model on [Huggingface Forum](https://discuss.huggingface.co/t/training-loss-0-0-validation-loss-nan/27950). 
+Thus, I checked the model card but it seems like it is trained using `bf16` dtype by the [config.json](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct/blob/main/config.json#L31). 
+When I checked the pulled model file, it appears to be the same thing. 
+I don't have an answer for this right now and anything could help. 
 
 
 ## References
