@@ -8,6 +8,7 @@ ml_data/
 tmp/
 information-14-00217-v2.pdf
 wandb/
+catboost_info/
 
 
 # Byte-compiled / optimized / DLL files
