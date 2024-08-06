@@ -3,13 +3,35 @@
 Classifying someone's MBTI type based on their text data.
 
 ## Table of Contents
-1. [Data Preparation](#data-preparation)
-2. [Machine Learning Approach](#machine-learning-approach)
-3. [Large Language Models Approach](#large-language-models-approach)
+- [MBTI Classifier - A Feasibility Study](#mbti-classifier---a-feasibility-study)
+  - [Table of Contents](#table-of-contents)
+  - [Data Preparation](#data-preparation)
+    - [Data curation](#data-curation)
+    - [Data summary](#data-summary)
+    - [Pre-processing](#pre-processing)
+    - [Baseline score](#baseline-score)
+  - [Machine Learning Approach](#machine-learning-approach)
+    - [Previous work](#previous-work)
+    - [My own attempt](#my-own-attempt)
+  - [Large Language Models Approach](#large-language-models-approach)
+    - [Get started](#get-started)
+    - [Reducing GPU memory usage](#reducing-gpu-memory-usage)
+    - [Fine tuning LLM](#fine-tuning-llm)
+    - [Adding system prompt](#adding-system-prompt)
+    - [Other dimensions of MBTI types](#other-dimensions-of-mbti-types)
+    - [Re-processing data](#re-processing-data)
+  - [Treating Imbalanced Data](#treating-imbalanced-data)
+    - [Overview](#overview)
+    - [Under-sampling the majority class](#under-sampling-the-majority-class)
+    - [Synthetic Minority Over-sampling Technique](#synthetic-minority-over-sampling-technique)
+    - [Class weight balancing](#class-weight-balancing)
+  - [Thoughs and Future Work](#thoughs-and-future-work)
+  - [References](#references)
+
 
 ## Data Preparation
 
-### Data Curation 
+### Data curation 
 
 I have created a custom dataset for this project and this dataset is available on 
 
@@ -45,7 +67,7 @@ I removed all the posts by this user to clean up the data.
 
 This is done in [remove_duplicate.py](./preprocessing/remove_duplicate.py)
 
-### Data Summary
+### Data summary
 
 The final dataset consist of 13M rows and 3 columns with 11,773 unique authors. 
 Each row contains one post with the author name and author's MBTI tag. 
@@ -53,7 +75,7 @@ I also provided a dataset with unique authors and their MBTI types.
 
 At this point, this can be considered as a foundation dataset for the MBTI classification. You can find the dataset on [Kaggle](https://www.kaggle.com/datasets/minhaozhang1/reddit-mbti-dataset).
 
-### Pre-Processing 
+### Pre-processing 
 
 Due to the nature of chat messages, the length of each message varies a lot. 
 A very short message may not contain enough information to predict someone's personality. 
@@ -65,7 +87,7 @@ As the tokenization is roughly based on words, the number of tokens in a sentenc
 Thus, I decided to further process the data into a narrower range of word length. 
 Detailed steps can be found in [evenout_word_length.py](./preprocessing/evenout_word_length.py) and the dataset can be found on [huggingface](https://huggingface.co/datasets/minhaozhang/mbti). 
 
-### Baseline Score
+### Baseline score
 
 As we have obtained our final dataset, we can explore the distribution of the MBTI types in the dataset. 
 We can use a majority classifier to see the baseline performance. 
@@ -81,7 +103,7 @@ You can find more information in [eda.ipynb](./preprocessing/eda.ipynb)
 
 ## Machine Learning Approach 
 
-### Previous Work
+### Previous work
 
 There has been efforts to predict someone's personality based on text data. 
 The most extreme example would be the series of quesitons from [16personalities.com](https://www.16personalities.com/) which will classify someone's MBTI type based on the answers. 
@@ -93,7 +115,7 @@ A simple way to tell is that for the binary classification for I/E, their best F
 However, based on their I/E distribution of 6676/1999, we can obtain the F1 score of 0.86978 when using a dummy model like a majority classifier. 
 This means that their model is not better than a simple majority classifier.
 
-### My Own Attempt 
+### My own attempt 
 
 I followed the same approach as Ryan et al. (2023) with my own cleaned and much larger dataset. 
 I used mostly the same data pre-processing strategy as them, but I used several gradient boosting classifier such as CatBoost, XGBoost, and LightGBM. 
@@ -177,7 +199,7 @@ Thus, I will try to employ the large language models to see if we can improve th
 
 ## Large Language Models Approach
 
-### Get Started
+### Get started
 
 I will be using the recently released [Phi-3](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/) model from Microsoft. 
 This model recently opened up its fine tuning on Azure AI Studio, but I decided to use the Huggingface's [transformers](https://huggingface.co/transformers/) library to fine tune the model as it is more flexible. 
@@ -190,7 +212,7 @@ This introduced some computation power requirement.
 Even with the smallest [Phi-3-mini-4k-instruct](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct) model, it is just infeasible to fine tune on my PC. 
 Thus, I used a cloud service with one A100 GPU to fine tune the model. 
 
-### Reducing GPU Memory Usage
+### Reducing GPU memory usage
 
 Though the machine with A100 GPU is much better than my PC, I still need to use some strategies to decrease the vRAM usage. 
 Using a tool like [Model Memory Estimator](https://huggingface.co/spaces/hf-accelerate/model-memory-usage) from Huggingface, the model with the `Adam` optimizer and dtype `float32` will require 57GB of peak vRAM. 
@@ -218,7 +240,7 @@ Thus, I checked the model card but it seems like it is trained using `bf16` dtyp
 When I checked the pulled model file, it appears to be the same thing. 
 I don't have an answer for this right now and anything could help. 
 
-### Fine Tuning LLM Attampts 
+### Fine tuning LLM 
 
 Following the tutorial which is about sentiment analysis, I modified the code to fit the MBTI classification task. 
 As the MBTI can be thought as 4 binary classification tasks, I decided to approach this problem by treating it as 4 binary classification tasks instead of a 16-class classification task.
@@ -240,7 +262,7 @@ However, in comparison with the [model baseline](#baseline-score), the model did
 This means that the model learned to predict everything to be the majority class.
 When I realized this, I paused the training and trying to figure out what went wrong.  
 
-### Adding System prompt
+### Adding system prompt
 
 At this point, I realize that it might be quite hard for the LLM to notice the pattern among each MBTI type. 
 This is much harder than the sentiment analysis task as the sentiment is much simpler. 
@@ -275,6 +297,63 @@ This is a clear indication of overfitting.
 This suggest that I should only train my model with one epoch as the model is already overfitting the second I introduced the data again.
 
 I trained the model on other dimensions as well, but the result is quite similar. 
+
+### Re-processing data 
+
+In the original data preparation, I removed all punctuations except for `?` and `!`.
+I also lowered all cases to make them easier for the word2vec model to learn. 
+In addition, my data in the beginning have about 200 words in each post. 
+This might not be enough for the LLMs to learn the pattern of speech. 
+Thus, I increased the number of words in each post to 400 while the overal samples decreased. 
+I re-processed the data as [re_process_data.ipynb](./preprocessing/re_process_data.ipynb) and fine-tuned the model again.
+Despite the changes, the model did not perform better than the majority classifier.
+
+## Treating Imbalanced Data 
+
+### Overview
+
+As the data is imbalanced, it is normal for the model to predict everything to be the majority class.
+Though LLMs are powerful, they are not immune to this problem.
+To treat this, there are several methods that can be employed. 
+- Over-sampling the minority class / Under-sampling the majority class
+- SMOTE (Synthetic Minority Over-sampling Technique)
+- Class weight balancing
+
+### Under-sampling the majority class
+
+As I discovered in previous section, the model overfit immediately when I introduced the data again.
+I believe that over-sampling the minority class will make the model overfit even faster. 
+Thus, I decided against using over-sampling and only use under-sampling.
+As I have a lot of data, I can afford to under-sample the majority class. 
+A simple way to do this is to randomly sample the majority class to the size of the minority class.
+
+To start, I started with the J-P type as it is somewhat imbalanced but not too skewed. 
+Using a subset of the train split, I splitted out another validation set. 
+Then, I under-sampled the majority class to the size of the minority class. 
+
+However, this did not improve the model's performance.
+The training loss is different which signify the data is different, but the accuracy and F1 score are still the same as the majority classifier.
+This maybe my naive implementation of under-sampling or it might be the nature of the MBTI classification. 
+
+### Synthetic Minority Over-sampling Technique
+
+SMOTE is a technique that generates synthetic samples for the minority class. 
+It is also available in the `imbalanced-learn` library. 
+There was a discussion [here](https://discuss.huggingface.co/t/how-to-apply-smote-to-a-dataset/27876), which uses the `imbalanced-learn` library to apply SMOTE to the dataset with a custom dataloader. 
+However, based on my research on SMOTE and the task, I believe it is not suitable for generating synthetic samples for text data. 
+Though Ryan et al. (2023) did use SMOTE in their work and they did show SMOTE improving the performance, their performance is still not better than the majority classifier. 
+This resulted me thinking there might be a better way to treat the imbalanced data.
+
+### Class weight balancing
+
+I tried out one method mentioned in a forum [post](https://discuss.huggingface.co/t/how-can-i-use-class-weights-when-training/1067). 
+The solution mentioned is quite simple and basically just scales the loss of the minority class by the ratio of the majority class to the minority class. 
+
+As I am using the J-P dimension which is a 60-40 split, I just set the weight to be opposite of the proportion. 
+
+The results are still pending. 
+
+## Thoughs and Future Work 
 
 ## References
 
