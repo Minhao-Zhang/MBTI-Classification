@@ -352,7 +352,15 @@ As I am using the J-P dimension which is a 60-40 split, I just set the weight to
 
 However, this did not improve the model's performance. 
 At the beggining of the training, the training loss shows me that it is trying to learn some pattern among the text, but it quickly turned into predicting everything to be the majority class.
-At this point, I have run out of ideas to try on this project. 
+
+Actualy, I have some good news. 
+
+![run_screenshot_3](./figs/run_screenshot_3.png)
+
+When I increased the training size, it appears to be that the model is learning something.
+As you can see, the accuracy is meaningfully higher than the majority classifier. 
+This is a good sign and I will continue to train this model to see if it can achieve a better performance. 
+
 
 ## Thoughs and Future Work 
 
