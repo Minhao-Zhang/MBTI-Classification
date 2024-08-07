@@ -2,9 +2,7 @@
 
 Classifying someone's MBTI type based on their text data.
 
-## Table of Contents
 - [MBTI Classifier - A Feasibility Study](#mbti-classifier---a-feasibility-study)
-  - [Table of Contents](#table-of-contents)
   - [Data Preparation](#data-preparation)
     - [Data curation](#data-curation)
     - [Data summary](#data-summary)
@@ -26,6 +24,8 @@ Classifying someone's MBTI type based on their text data.
     - [Synthetic Minority Over-sampling Technique](#synthetic-minority-over-sampling-technique)
     - [Class weight balancing](#class-weight-balancing)
   - [Thoughs and Future Work](#thoughs-and-future-work)
+    - [Thoughts](#thoughts)
+    - [Future work](#future-work)
   - [References](#references)
 
 
@@ -348,12 +348,48 @@ This resulted me thinking there might be a better way to treat the imbalanced da
 
 I tried out one method mentioned in a forum [post](https://discuss.huggingface.co/t/how-can-i-use-class-weights-when-training/1067). 
 The solution mentioned is quite simple and basically just scales the loss of the minority class by the ratio of the majority class to the minority class. 
-
 As I am using the J-P dimension which is a 60-40 split, I just set the weight to be opposite of the proportion. 
 
-The results are still pending. 
+However, this did not improve the model's performance. 
+At the beggining of the training, the training loss shows me that it is trying to learn some pattern among the text, but it quickly turned into predicting everything to be the majority class.
+At this point, I have run out of ideas to try on this project. 
 
 ## Thoughs and Future Work 
+
+### Thoughts 
+
+The MBTI classification based on text data is indeed challenging. 
+It is unlike sentiment analysis where the sentiment is mostly quite clear in the text especially there are so many keywords we can try to look for. 
+The MBTI classification task is much more subtle and it is hard to tell the personality of someone just by reading their text.
+You have to analyze the context and habbit of speech and itention of the speaker to actaully predict this properly. 
+This might still be quite challenging for the LLMs to learn.
+
+### Future work 
+
+There are places where I can improve on this project.
+1. Use a better and longer datast. 
+  In this project, each post is either about 200 or 400 words long in order to have a meaningfully large dataset. 
+  If I combine the shorter text to even longer ones, the number of samples will decrease dramatically. 
+  Addtionally, many of the long posts are by few authors which might introduce some bias. 
+  Hence, a better dataset with longer posts and more samples is needed.
+2. Use a better LLM model.
+  I am using the Phi-3 model which is a quite new model. 
+  It is good at logical inference and mathematically reasoning. 
+  It has 3.8B parameters and 4k token context. 
+  In comparison with other models, phi-3-mini-4k-instruct is quite a small model.
+  Some SOTA models, at the moment I am writing this, like Llama3.1 can go upto 405B parameters with 128k token context. 
+  These models will undoubtly extract more information from the text and might perform better on this task. 
+  Sadly, due to the limitation of my computation power, I cannot try fine tuning these models. 
+3. Use a better fine tuning strategy.
+  I am using the `AutoModelForSequenceClassification` from `trasformers` from the tutorial on Huggingface.
+  It is a good start point, but it might not be the best strategy for this task.
+  Using torch with custom training loop might be a better strategy as it allows more flexibility. 
+4. Use a better data pre-processing strategy.
+  The data pre-processing strategy I used is quite simple and naive. 
+  Though many of them are quite common in the NLP community, they might not be the best for this task. 
+  Using a more advanced data pre-processing strategy might improve the model's performance.
+  However, these might require some domain knowledge from phychology and linguistics. 
+
 
 ## References
 
