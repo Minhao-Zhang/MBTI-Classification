@@ -2,32 +2,6 @@
 
 Classifying someone's MBTI type based on their text data.
 
-- [MBTI Classifier - A Feasibility Study](#mbti-classifier---a-feasibility-study)
-  - [Data Preparation](#data-preparation)
-    - [Data curation](#data-curation)
-    - [Data summary](#data-summary)
-    - [Pre-processing](#pre-processing)
-    - [Baseline score](#baseline-score)
-  - [Machine Learning Approach](#machine-learning-approach)
-    - [Previous work](#previous-work)
-    - [My own attempt](#my-own-attempt)
-  - [Large Language Models Approach](#large-language-models-approach)
-    - [Get started](#get-started)
-    - [Reducing GPU memory usage](#reducing-gpu-memory-usage)
-    - [Fine tuning LLM](#fine-tuning-llm)
-    - [Adding system prompt](#adding-system-prompt)
-    - [Other dimensions of MBTI types](#other-dimensions-of-mbti-types)
-    - [Re-processing data](#re-processing-data)
-  - [Treating Imbalanced Data](#treating-imbalanced-data)
-    - [Overview](#overview)
-    - [Under-sampling the majority class](#under-sampling-the-majority-class)
-    - [Synthetic Minority Over-sampling Technique](#synthetic-minority-over-sampling-technique)
-    - [Class weight balancing](#class-weight-balancing)
-  - [Thoughs and Future Work](#thoughs-and-future-work)
-    - [Thoughts](#thoughts)
-    - [Future work](#future-work)
-  - [References](#references)
-
 
 ## Data Preparation
 
@@ -362,7 +336,7 @@ As you can see, the accuracy is meaningfully higher than the majority classifier
 This is a good sign and I will continue to train this model to see if it can achieve a better performance. 
 
 
-## Thoughs and Future Work 
+## Thoughts and Future Work 
 
 ### Thoughts 
 
@@ -384,7 +358,7 @@ There are places where I can improve on this project.
   I am using the Phi-3 model which is a quite new model. 
   It is good at logical inference and mathematically reasoning. 
   It has 3.8B parameters and 4k token context. 
-  In comparison with other models, phi-3-mini-4k-instruct is quite a small model.
+  In comparison with other models, `phi-3-mini-4k-instruct` is quite a small model.
   Some SOTA models, at the moment I am writing this, like Llama3.1 can go upto 405B parameters with 128k token context. 
   These models will undoubtly extract more information from the text and might perform better on this task. 
   Sadly, due to the limitation of my computation power, I cannot try fine tuning these models. 
