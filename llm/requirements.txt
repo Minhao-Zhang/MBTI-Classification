@@ -1,0 +1,6 @@
+numpy 
+scikit-learn
+python-dotenv
+datasets 
+transformers
+evaluate 

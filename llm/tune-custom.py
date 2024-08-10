@@ -21,14 +21,14 @@ mbti_data = mbti_data.class_encode_column("J-P")
 
 mbti_data = mbti_data.train_test_split(test_size=0.1, stratify_by_column="mbti", seed=0) # remove the 10% 
 mbti_data = mbti_data["train"]
-mbti_data = mbti_data.train_test_split(test_size=0.2, stratify_by_column="mbti", seed=0) # 90%  * 20% = 18%
+mbti_data = mbti_data.train_test_split(test_size=0.2, stratify_by_column="mbti", seed=1) # 90%  * 20% = 18%
 mbti_data = mbti_data["test"]
-mbti_data = mbti_data.train_test_split(test_size=0.1, stratify_by_column="mbti", seed=1)
+mbti_data = mbti_data.train_test_split(test_size=0.1, stratify_by_column="mbti", seed=2)
 
 
 # %%
-MODEL = "microsoft/Phi-3-mini-4k-instruct"
-TRAINED_MODEL = "Phi-3-mini-4k-instruct-mbti-2"
+MODEL = "minhaozhang/Phi-3-mini-4k-instruct-mbti-2"
+TRAINED_MODEL = "Phi-3-mini-4k-instruct-mbti-JP"
 
 # %%
 from transformers import AutoTokenizer 
