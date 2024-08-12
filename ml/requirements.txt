@@ -4,3 +4,6 @@ scikit-learn
 nltk 
 matplotlib
 gensim 
+catboost 
+xgboost
+lightgbm

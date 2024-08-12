@@ -1,67 +1,80 @@
-# MBTI Classifier - A Feasibility Study
+# MBTI Classification - A Feasibility Study
 
 Classifying someone's MBTI type based on their text data.
 
 此文章有[中文版本](./README_ZH.md)。
 
+- [MBTI Classification - A Feasibility Study](#mbti-classification---a-feasibility-study)
+  - [Data Preparation](#data-preparation)
+    - [Data Curation](#data-curation)
+    - [Data Summary](#data-summary)
+    - [Pre-processing](#pre-processing)
+    - [Baseline Score](#baseline-score)
+  - [Machine Learning Approach](#machine-learning-approach)
+    - [Previous Work](#previous-work)
+    - [My Approach](#my-approach)
+  - [Large Language Models Approach](#large-language-models-approach)
+    - [Getting Started](#getting-started)
+    - [Reducing GPU Memory Usage](#reducing-gpu-memory-usage)
+    - [Fine-Tuning the LLM](#fine-tuning-the-llm)
+    - [Adding a System Prompt](#adding-a-system-prompt)
+    - [Other MBTI Dimensions](#other-mbti-dimensions)
+    - [Re-processing the Data](#re-processing-the-data)
+  - [Treating Imbalanced Data](#treating-imbalanced-data)
+    - [Overview](#overview)
+    - [Under-sampling the Majority Class](#under-sampling-the-majority-class)
+    - [Synthetic Minority Over-sampling Technique (SMOTE)](#synthetic-minority-over-sampling-technique-smote)
+    - [Class Weight Balancing](#class-weight-balancing)
+  - [Thoughts and Future Work](#thoughts-and-future-work)
+    - [Thoughts](#thoughts)
+    - [Future Work](#future-work)
+  - [References](#references)
+
+
+
 ## Data Preparation
 
 ### Data Curation 
 
-For this project, I created a custom dataset that is publicly available. 
-The raw data, originally uploaded to [Zenodo](https://zenodo.org/records/1482951) by Dylan Storey, was sourced from Reddit using Google Big Query. 
-The data consists of posts from users who have self-identified their MBTI type. 
-You can download the raw data by running the following command:
+For this project, I curated a custom dataset that is publicly accessible. The raw data, initially uploaded to [Zenodo](https://zenodo.org/records/1482951) by Dylan Storey, was collected from Reddit using Google Big Query. It consists of posts from users who have self-identified their MBTI type. To download the raw data, run the following command:
 
 ```bash
 ./setup.sh
 ```
 
-This command will also create the necessary temporary directories for data processing.
+This command also sets up the necessary temporary directories for data processing.
 
-The data underwent extensive cleaning, including:
-- Lowercasing all text.
-- Removing all URLs.
-- Excluding posts containing non-English characters.
-- Stripping Reddit-specific links such as `r/abcd` and `u/abcd`.
-- Removing all special characters except for `?` and `!`.
+The data underwent thorough cleaning, including the following steps:
+- Converting all text to lowercase.
+- Removing URLs.
+- Excluding posts with non-English characters.
+- Stripping Reddit-specific links like `r/abcd` and `u/abcd`.
+- Removing special characters except `?` and `!`.
 - Filtering out posts with fewer than 20 characters or more than 3,000 characters.
 
-For a detailed overview of the cleaning steps, refer to [clean_data.py](./preprocessing/clean_data.py).
+For a detailed breakdown of the cleaning process, refer to [clean_data.py](./preprocessing/clean_data.py).
 
-During the cleaning process, I identified some discrepancies in the data:
-- Some authors were associated with multiple MBTI types.
+During the cleaning, I identified several discrepancies:
+- Some authors were linked to multiple MBTI types.
 - Some posts were duplicated by the same author.
 
-To address these issues, I removed all duplicates and excluded posts from a user who had posted inappropriate content, leading to their ban by several moderators. 
-All posts by this user were removed to maintain data integrity. 
-These steps are implemented in [remove_duplicate.py](./preprocessing/remove_duplicate.py).
+To resolve these issues, I removed all duplicates and excluded posts from a user who had posted inappropriate content, resulting in their ban by several moderators. All posts from this user were removed to maintain data integrity. These steps are implemented in [remove_duplicate.py](./preprocessing/remove_duplicate.py).
 
 ### Data Summary
 
-The final dataset comprises 13 million rows and 3 columns, representing 11,773 unique authors. 
-Each row contains a single post, along with the author's name and MBTI type. 
-Additionally, a separate dataset with unique authors and their MBTI types is provided.
+The final dataset comprises 13 million rows and 3 columns, representing 11,773 unique authors. Each row contains a single post, along with the author's name and MBTI type. Additionally, a separate dataset with unique authors and their MBTI types is provided.
 
-This dataset serves as a foundational resource for MBTI classification. 
-It is available for download on [Kaggle](https://www.kaggle.com/datasets/minhaozhang1/reddit-mbti-dataset).
+This dataset serves as a key resource for MBTI classification and is available for download on [Kaggle](https://www.kaggle.com/datasets/minhaozhang1/reddit-mbti-dataset).
 
 ### Pre-processing 
 
-Given the nature of chat messages, the length of each message varies significantly. 
-Very short messages may not provide sufficient information for accurate personality prediction. 
-To address this, I combined shorter messages to ensure a minimum length of 700 characters (including spaces) and a maximum of 1,000 characters. 
-Detailed steps are provided in [combine_short_text.py](./preprocessing/combine_short_text.py).
+Due to the nature of chat messages, their lengths vary significantly. Very short messages may lack sufficient information for accurate personality prediction. To address this, I combined shorter messages to ensure a minimum length of 700 characters (including spaces) and a maximum of 1,000 characters. The detailed steps are provided in [combine_short_text.py](./preprocessing/combine_short_text.py).
 
-Although counting characters is effective for creating a balanced dataset, it may introduce challenges when using LLMs' tokenization, which is based on words rather than characters. 
-To mitigate this, I further processed the data to achieve a narrower range of word lengths. 
-The steps are detailed in [evenout_word_length.py](./preprocessing/evenout_word_length.py), and the dataset can be accessed on [Hugging Face](https://huggingface.co/datasets/minhaozhang/mbti).
+Although using character count helps create a balanced dataset, it may introduce challenges when using LLMs, which tokenize based on words rather than characters. To mitigate this, I further processed the data to achieve a narrower range of word lengths. The steps are detailed in [evenout_word_length.py](./preprocessing/evenout_word_length.py), and the dataset can be accessed on [Hugging Face](https://huggingface.co/datasets/minhaozhang/mbti).
 
 ### Baseline Score
 
-With the final dataset prepared, we can explore the distribution of MBTI types within it. 
-A majority classifier can be used to establish baseline performance. 
-More information can be found in [eda.ipynb](./preprocessing/eda.ipynb).
+With the final dataset prepared, we can explore the distribution of MBTI types within it. A majority classifier can be used to establish a baseline performance. Further details are available in [eda.ipynb](./preprocessing/eda.ipynb).
 
 | Type | Accuracy | F1 Score |
 | ---- | -------- | -------- |
@@ -70,32 +83,19 @@ More information can be found in [eda.ipynb](./preprocessing/eda.ipynb).
 | F-T  | 0.53863  | 0.70014  |
 | J-P  | 0.59189  | 0.74363  |
 
-
 ## Machine Learning Approach 
 
 ### Previous Work
 
-There have been various efforts to predict personality traits based on text data. 
-One of the most well-known examples is the questionnaire provided by [16personalities.com](https://www.16personalities.com/), which classifies an individual's MBTI type based on their responses. 
-However, predicting personality from natural conversation data presents a much greater challenge. 
-A notable attempt in this area is documented by Ryan et al. (2023), where they used a dataset from Kaggle to predict MBTI types from text data.
+Various efforts have been made to predict personality traits based on text data, with one of the most well-known examples being the questionnaire provided by [16personalities.com](https://www.16personalities.com/), which assigns an MBTI type based on user responses. However, predicting personality from natural conversation data is significantly more challenging. A notable attempt in this area was conducted by Ryan et al. (2023), who used a Kaggle dataset to predict MBTI types from text data.
 
-Ryan et al. employed a traditional machine learning approach, utilizing a TF-IDF vectorizer combined with classifiers like CatBoost, along with the SMOTE technique to balance the data. 
-Despite demonstrating some improvement with SMOTE, their model's performance was underwhelming. 
-For instance, their best F1 score for the binary classification of I/E was 0.8389. 
-However, given the I/E distribution of 6676/1999, a simple majority classifier could achieve an F1 score of 0.86978. 
-This indicates that their model did not outperform a basic majority classifier.
+Ryan et al. utilized a traditional machine learning approach, combining a TF-IDF vectorizer with classifiers like CatBoost and employing the SMOTE technique to balance the data. Despite some improvement with SMOTE, the model's performance remained suboptimal. For example, their best F1 score for the binary classification of I/E was 0.8389. However, given the I/E distribution of 6676/1999, a simple majority classifier could achieve an F1 score of 0.86978, indicating that their model did not outperform this basic benchmark.
 
 ### My Approach
 
-I replicated the approach of Ryan et al. (2023) using my own cleaned and significantly larger dataset. 
-While I adopted a similar data preprocessing strategy, I experimented with several gradient boosting classifiers, including CatBoost, XGBoost, and LightGBM. 
-Although my data distribution differed from theirs, the results were still disappointing, with my best F1 score equal to the majority classifier. 
-The detailed training and evaluation process is documented in [train_model.ipynb](./ml/train_model.ipynb).
+I replicated Ryan et al.'s (2023) approach using my own cleaned and substantially larger dataset. While I employed a similar data preprocessing strategy, I experimented with several gradient boosting classifiers, including CatBoost, XGBoost, and LightGBM. Despite differences in data distribution, my results were similarly disappointing, with my best F1 score matching that of the majority classifier. The detailed training and evaluation process is documented in [train_model.ipynb](./ml/train_model.ipynb).
 
-These unsatisfactory results might be attributed to the inherent complexity of MBTI classification or the limitations of traditional machine learning techniques. 
-Therefore, I will explore the potential of large language models to see if they can enhance performance.
-
+These unsatisfactory results may stem from the inherent complexity of MBTI classification or the limitations of traditional machine learning techniques. As a result, I plan to explore the potential of large language models to improve performance.
 
 <table>
   <tr>
@@ -173,109 +173,77 @@ Therefore, I will explore the potential of large language models to see if they 
 
 ### Getting Started
 
-I decided to use Microsoft's recently released [Phi-3](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/) model for this project. 
-Although Phi-3 recently became available for fine-tuning on Azure AI Studio, I opted to use the Hugging Face [Transformers](https://huggingface.co/transformers/) library for its greater flexibility in fine-tuning.
+For this project, I chose to use Microsoft's recently released [Phi-3](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/) model. Although Phi-3 has recently become available for fine-tuning on Azure AI Studio, I opted to use the Hugging Face [Transformers](https://huggingface.co/transformers/) library for its greater flexibility in fine-tuning.
 
-To begin, I followed the [sequence classification tutorial](https://huggingface.co/docs/transformers/en/tasks/sequence_classification) on Hugging Face, which demonstrates fine-tuning a model using Google's BERT.
- While the tutorial provides a clear structure for fine-tuning, I replaced BERT with the more advanced Phi-3 model. 
- However, this introduced higher computational requirements. 
- Even with the smallest [Phi-3-mini-4k-instruct](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct) model, fine-tuning on my PC was impractical. 
- To overcome this, I utilized a cloud service with an A100 GPU for the fine-tuning process.
+To get started, I followed the [sequence classification tutorial](https://huggingface.co/docs/transformers/en/tasks/sequence_classification) on Hugging Face, which outlines fine-tuning a model using Google's BERT. While the tutorial provided a solid framework, I replaced BERT with the more advanced Phi-3 model. However, this substitution introduced higher computational demands. Even with the smallest [Phi-3-mini-4k-instruct](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct) model, fine-tuning on my PC proved impractical. To address this, I utilized a cloud service with an A100 GPU for the fine-tuning process.
 
 ### Reducing GPU Memory Usage
 
-Despite the A100 GPU's superior capabilities, I still needed to employ strategies to reduce vRAM usage. 
-Using Hugging Face's [Model Memory Estimator](https://huggingface.co/spaces/hf-accelerate/model-memory-usage), I found that the model, combined with the `Adam` optimizer and `float32` dtype, required 57GB of peak vRAM. 
-This, along with the space needed for the data, would exceed the 80GB vRAM capacity of the A100 GPU. 
-Therefore, I implemented several strategies to optimize memory usage.
+Despite the A100 GPU's high performance, I still needed to implement strategies to manage vRAM usage. Using Hugging Face's [Model Memory Estimator](https://huggingface.co/spaces/hf-accelerate/model-memory-usage), I discovered that the model, combined with the `Adam` optimizer and `float32` dtype, required 57GB of peak vRAM. This, in addition to the space needed for data, would exceed the 80GB vRAM capacity of the A100 GPU. Therefore, I applied several strategies to optimize memory usage.
 
-All of these strategies were adapted from the [Transformers](https://huggingface.co/docs/transformers/perf_train_gpu_one) tutorials.
+These strategies were adapted from the [Transformers](https://huggingface.co/docs/transformers/perf_train_gpu_one) tutorials.
 
-| Method/Tool                            | Methods I Employed                                |
-| -------------------------------------- | ------------------------------------------------- |
-| Batch size choice                      | Yes, to reduce vRAM usage                         |
-| Gradient accumulation                  | Yes, to effectively increase the batch size       |
-| Gradient checkpointing                 | No, it decreases training speed by 20%            |
-| Mixed precision training               | Yes, used `tf32` to increase training speed       |
-| torch_empty_cache_steps                | No, it decreases training speed by 10%            |
-| Optimizer choice                       | Yes, used `adamw_bnb_8bit` to reduce memory usage |
-| Data preloading                        | Yes, by default                                   |
-| DeepSpeed Zero                         | No, I couldn't set up the environment             |
-| torch.compile                          | No, I couldn't set up the environment             |
-| Parameter-Efficient Fine Tuning (PEFT) | No, I couldn't set up the environment             |
+| Method/Tool                            | Implementation Details                             |
+| -------------------------------------- | -------------------------------------------------- |
+| Batch size choice                      | Yes, to reduce vRAM usage                          |
+| Gradient accumulation                  | Yes, to effectively increase the batch size        |
+| Gradient checkpointing                 | No, as it decreases training speed by 20%          |
+| Mixed precision training               | Yes, used `tf32` to increase training speed        |
+| `torch_empty_cache_steps`              | No, as it decreases training speed by 10%          |
+| Optimizer choice                       | Yes, used `adamw_bnb_8bit` to reduce memory usage  |
+| Data preloading                        | Yes, by default                                    |
+| DeepSpeed Zero                         | No, due to difficulties setting up the environment |
+| `torch.compile`                        | No, due to difficulties setting up the environment |
+| Parameter-Efficient Fine Tuning (PEFT) | No, due to difficulties setting up the environment |
 
-One interesting observation was that when I attempted to use the `bf16` dtype to further reduce memory usage, the model's loss output became `nan`. 
-I found a similar issue discussed in a [Hugging Face forum post](https://discuss.huggingface.co/t/training-loss-0-0-validation-loss-nan/27950), although it involved a different model. 
-According to the [config.json](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct/blob/main/config.json#L31) file, the model was trained using the `bf16` dtype, but this did not resolve the issue. 
-I have yet to find a solution and welcome any insights.
+An interesting observation was that when I attempted to use the `bf16` dtype to further reduce memory usage, the model's loss output became `nan`. I found a similar issue discussed in a [Hugging Face forum post](https://discuss.huggingface.co/t/training-loss-0-0-validation-loss-nan/27950), though it involved a different model. According to the [config.json](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct/blob/main/config.json#L31) file, the model was trained using the `bf16` dtype, but this did not resolve the issue. I have yet to find a solution and welcome any insights.
 
 ### Fine-Tuning the LLM 
 
-Building on the sentiment analysis tutorial, I adapted the code to fit the MBTI classification task. 
-Since the MBTI can be broken down into four binary classification tasks, I treated it as such rather than a single 16-class classification task. 
-I started with the J-P type classification, as its distribution is relatively balanced, though slightly skewed. 
-Using a 1% subset of the training split, I began fine-tuning the model. 
-Initially, it appeared that the model was learning effectively.
+Building on the sentiment analysis tutorial, I adapted the code for the MBTI classification task. Since the MBTI can be broken down into four binary classification tasks, I approached it this way rather than as a single 16-class classification task. **For more information on this choice, please see [here](#future-work)**. I began with the J-P type classification, as its distribution is relatively balanced, though slightly skewed. Using a 1% subset of the training split, I initiated fine-tuning. Initially, it seemed that the model was learning effectively.
 
 ![screenshot](./figs/run_screenshot_0.png)
 
-The model's accuracy surpassed that of the majority classifier. 
-However, this could have been due to random chance. 
-After optimizing my code (I realized I was not using `tf32` as intended) and increasing the dataset size to 10% of the training split, the results were less promising.
+The model's accuracy surpassed that of the majority classifier, but this could have been due to random chance. After optimizing my code (I realized I was not using `tf32` as intended) and increasing the dataset size to 10% of the training split, the results were less promising.
 
 ![screenshot](./figs/run_screenshot_1.png)
 
-While the fine-tuned model showed some ability to classify the J-P type, it failed to outperform the majority classifier, indicating that it had learned to predict the majority class exclusively. 
-Recognizing this issue, I paused the training to diagnose the problem.
+While the fine-tuned model showed some ability to classify the J-P type, it failed to outperform the majority classifier, indicating that it had learned to predict only the majority class. Recognizing this issue, I paused the training to diagnose the problem.
+
 
 ### Adding a System Prompt
 
-At this stage, I realized that identifying patterns in MBTI types might be more challenging for the LLM compared to simpler tasks like sentiment analysis. 
-The complexity of MBTI classification requires more nuanced understanding. 
-To aid the model, I introduced a semi-system prompt before each input text:
+At this point, I recognized that identifying patterns in MBTI types might be more challenging for the LLM than simpler tasks like sentiment analysis. The complexity of MBTI classification requires a more nuanced understanding. To assist the model, I introduced a semi-system prompt before each input text:
 
 ```text
-You are an MBTI expert trying to identify, using the text below, which personality type they are. 
-You are only predicting Judging-Perceiving (J-P) for this task. Predict 0 for J and 1 for P.
-Learn the personality, not the proportion of data. Here is the text:
+You are an MBTI expert tasked with identifying, based on the text below, which personality type the author has. 
+For this task, you are only predicting Judging-Perceiving (J-P). Predict 0 for J and 1 for P.
+Focus on learning the personality, not the data distribution. Here is the text:
 ```
 
-The intent was to guide the model on what to focus on. 
-Unfortunately, this adjustment did not result in any performance improvement.
+The purpose of this prompt was to guide the model's focus. Unfortunately, this adjustment did not lead to any improvement in performance.
 
 ### Other MBTI Dimensions
 
-Given the challenges with the J-P classification, I decided to experiment with other MBTI dimensions. 
-I chose the Feeling-Thinking (F-T) dimension next, as it is the most balanced. 
-Initially, I did not include the system prompt in the input.
+Given the difficulties with J-P classification, I decided to experiment with other MBTI dimensions. I chose the Feeling-Thinking (F-T) dimension next, as it is the most balanced. Initially, I did not include the system prompt in the input.
 
-I used a 5% subset of the training split to start fine-tuning the model.
+I used a 5% subset of the training split to fine-tune the model.
 
 ![Screenshot](./figs/run_screenshot_2.png)
 
-The model achieved a higher accuracy score, but the F1 score was lower. 
-A noticeable drop in both accuracy and F1 score occurred around the 8000-step mark, which coincided with the start of a new epoch, indicating that the model was re-training on the same data. 
-By 9000 steps, the model's training loss was extremely low, while the validation loss remained high, signaling clear overfitting. 
-This suggests that limiting the training to a single epoch may be necessary, as the model overfits as soon as the data is reintroduced.
+The model achieved a higher accuracy score, but the F1 score was lower. A significant drop in both accuracy and F1 score occurred around the 8000-step mark, which coincided with the start of a new epoch, suggesting that the model was re-training on the same data. By 9000 steps, the model's training loss had dropped significantly, while the validation loss remained high, indicating clear overfitting. This suggests that limiting training to a single epoch might be necessary, as the model begins to overfit as soon as it encounters the same data again.
 
-I attempted to train the model on other MBTI dimensions, but the results were similar.
+I also attempted to train the model on all other MBTI dimensions, but the results were similarly disappointing.
 
 ### Re-processing the Data
 
-Initially, I removed all punctuation except for `?` and `!`, and converted all text to lowercase to facilitate word2vec model training. 
-Additionally, the posts in my dataset were limited to around 200 words each, which might not have provided enough context for the LLM to detect speech patterns. 
-I increased the word count per post to 400, although this reduced the overall number of samples. 
-The data was reprocessed as detailed in [re_process_data.ipynb](./preprocessing/re_process_data.ipynb), and the model was fine-tuned again. 
-Despite these adjustments, the model still did not perform better than a majority classifier.
-
+Initially, I removed all punctuation except for `?` and `!` and converted all text to lowercase to facilitate word2vec model training. Additionally, the posts in my dataset were limited to around 200 words each, which might not have provided enough context for the LLM to detect speech patterns. I increased the word count per post to 400, although this reduced the overall number of samples. The data was reprocessed as detailed in [re_process_data.ipynb](./preprocessing/re_process_data.ipynb), and the model was fine-tuned again. Despite these adjustments, the model still failed to outperform a majority classifier.
 
 ## Treating Imbalanced Data
 
 ### Overview
 
-Imbalanced data is a common challenge in classification tasks, and even powerful models like LLMs are not immune to this issue. 
-When faced with imbalanced data, models often default to predicting the majority class, leading to poor performance on the minority class. 
-To address this, several methods can be employed:
+Imbalanced data is a common challenge in classification tasks, and even powerful models like LLMs struggle with this issue. When dealing with imbalanced datasets, models often default to predicting the majority class, resulting in poor performance on the minority class. To address this, several techniques can be applied:
 
 - Over-sampling the minority class / Under-sampling the majority class
 - SMOTE (Synthetic Minority Over-sampling Technique)
@@ -283,64 +251,73 @@ To address this, several methods can be employed:
 
 ### Under-sampling the Majority Class
 
-As observed in the previous sections, the model exhibited overfitting when reintroduced to the training data. 
-Given this, over-sampling the minority class could exacerbate overfitting, so I opted for under-sampling the majority class instead. 
-With ample data at my disposal, I could afford to reduce the size of the majority class without compromising overall dataset size. 
-A straightforward approach to under-sampling involved randomly selecting a subset of the majority class to match the size of the minority class.
+As noted in previous sections, the model exhibited signs of overfitting when reintroduced to the training data. Given this, over-sampling the minority class could exacerbate the overfitting issue, so I opted to under-sample the majority class instead. With a large dataset available, I could reduce the size of the majority class without compromising the overall data quantity. The approach I used involved randomly selecting a subset of the majority class to match the size of the minority class.
 
-I began with the J-P dimension, which is somewhat imbalanced but not excessively so. 
-After splitting out an additional validation set from the training subset, I under-sampled the majority class. 
-However, this strategy did not lead to any improvement in model performance. 
-Although the training loss changed, indicating that the data distribution was different, the accuracy and F1 scores remained comparable to those of the majority classifier. 
-This outcome suggests that my basic implementation of under-sampling may not have been sufficient or that MBTI classification inherently poses challenges for this method.
+I started with the J-P dimension, which is somewhat imbalanced but not excessively so. After creating an additional validation set from the training data, I under-sampled the majority class. However, this strategy did not lead to any improvement in model performance. Although the training loss varied, reflecting the altered data distribution, the accuracy and F1 scores remained similar to those of the majority classifier. This suggests that my basic under-sampling approach may not have been effective or that MBTI classification presents inherent challenges for this method.
 
 ### Synthetic Minority Over-sampling Technique (SMOTE)
 
-SMOTE generates synthetic samples for the minority class, and it's accessible through the `imbalanced-learn` library. 
-A discussion on [Hugging Face's forum](https://discuss.huggingface.co/t/how-to-apply-smote-to-a-dataset/27876) explored using SMOTE with a custom dataloader for text data. 
-However, based on my research, I concluded that SMOTE might not be suitable for generating synthetic text data. 
-Although Ryan et al. (2023) employed SMOTE in their work and observed performance gains, their model still did not surpass the majority classifier. 
-This led me to consider alternative approaches for handling imbalanced data.
+SMOTE, which generates synthetic samples for the minority class, is available through the `imbalanced-learn` library. A discussion on [Hugging Face's forum](https://discuss.huggingface.co/t/how-to-apply-smote-to-a-dataset/27876) explored using SMOTE with a custom dataloader for text data. However, based on my research, I concluded that SMOTE might not be well-suited for generating synthetic text data. Although Ryan et al. (2023) used SMOTE in their work and observed some performance gains, their model still did not outperform the majority classifier. This led me to explore alternative approaches for handling imbalanced data.
 
 ### Class Weight Balancing
 
-Another technique I explored was class weight balancing, as suggested in a [forum post](https://discuss.huggingface.co/t/how-can-i-use-class-weights-when-training/1067). 
-This method involves scaling the loss associated with the minority class by the ratio of the majority class to the minority class. 
-For the J-P dimension, which has a 60-40 split, I inversely set the weights based on the class proportions.
+I also experimented with class weight balancing, as recommended in a [forum post](https://discuss.huggingface.co/t/how-can-i-use-class-weights-when-training/1067). This technique involves adjusting the loss associated with the minority class by scaling it according to the ratio of the majority to the minority class. For the J-P dimension, which has a 60-40 split, I inversely set the weights based on the class proportions.
 
-Unfortunately, this approach did not significantly enhance the model's performance. 
-While the training loss initially indicated that the model was attempting to learn patterns within the text, it soon defaulted to predicting the majority class consistently.
-
-However, there was a promising development:
+When I used 10% of the training data, the model began to show signs of learning.
 
 ![Screenshot](./figs/run_screenshot_3.png)
 
-When I increased the training size, the model began to show signs of learning. 
-The accuracy surpassed that of the majority classifier, which is an encouraging indicator. 
-I plan to continue training this model to see if further improvements can be achieved.
+The accuracy surpassed that of the majority classifier, which was an encouraging sign. I continued training with an additional 18% of the data, using 1.8% as the evaluation set. The results obtained in the logs were as follows:
 
+```text
+{'loss': 0.6714, 'grad_norm': 5.364511013031006, 'learning_rate': 1.8698086186694442e-05, 'epoch': 0.07}
+{'loss': 0.6658, 'grad_norm': 22.42624855041504, 'learning_rate': 1.7396172373388882e-05, 'epoch': 0.13}
+{'loss': 0.6613, 'grad_norm': 14.555525779724121, 'learning_rate': 1.6094258560083326e-05, 'epoch': 0.2}
+{'loss': 0.6558, 'grad_norm': 24.612394332885742, 'learning_rate': 1.4792344746777764e-05, 'epoch': 0.26}
+{'eval_loss': 0.6462374329566956, 'eval_accuracy': 0.6259446950612221, 'eval_f1': 0.6740354056848205, 'eval_matthews_correlation': 0.2369166100794352, 'eval_runtime': 1751.6386, 'eval_samples_per_second': 38.978, 'eval_steps_per_second': 9.745, 'epoch': 0.26}
+{'loss': 0.6529, 'grad_norm': 9.507387161254883, 'learning_rate': 1.3490430933472205e-05, 'epoch': 0.33}
+{'loss': 0.6435, 'grad_norm': 19.002174377441406, 'learning_rate': 1.2188517120166645e-05, 'epoch': 0.39}
+{'loss': 0.6433, 'grad_norm': 1.6572412252426147, 'learning_rate': 1.0886603306861087e-05, 'epoch': 0.46}
+{'loss': 0.6363, 'grad_norm': 13.904766082763672, 'learning_rate': 9.584689493555527e-06, 'epoch': 0.52}
+{'eval_loss': 0.6292107105255127, 'eval_accuracy': 0.6420118343195266, 'eval_f1': 0.6934557403366193, 'eval_matthews_correlation': 0.26360932965460177, 'eval_runtime': 1750.7546, 'eval_samples_per_second': 38.998, 'eval_steps_per_second': 9.75, 'epoch': 0.52}
+{'loss': 0.6362, 'grad_norm': 16.839187622070312, 'learning_rate': 8.282775680249967e-06, 'epoch': 0.59}
+{'loss': 0.6279, 'grad_norm': 9.333328247070312, 'learning_rate': 6.980861866944409e-06, 'epoch': 0.65}
+{'loss': 0.6225, 'grad_norm': 11.680238723754883, 'learning_rate': 5.67894805363885e-06, 'epoch': 0.72}
+{'eval_loss': 0.6130561232566833, 'eval_accuracy': 0.6583572558439276, 'eval_f1': 0.7098467509204897, 'eval_matthews_correlation': 0.29455154970144476, 'eval_runtime': 1768.5199, 'eval_samples_per_second': 38.606, 'eval_steps_per_second': 9.652, 'epoch': 0.78}
+{'loss': 0.6173, 'grad_norm': 5.525467395782471, 'learning_rate': 3.075120427027731e-06, 'epoch': 0.85}
+{'loss': 0.6145, 'grad_norm': 3.068687915802002, 'learning_rate': 1.7732066137221718e-06, 'epoch': 0.91}
+{'loss': 0.6046, 'grad_norm': 4.138741970062256, 'learning_rate': 4.7129280041661244e-07, 'epoch': 0.98}
+```
+
+We can visualize the training process in the following plot:
+
+![log.png](./figs/log.png)
+
+Focusing on the evaluation accuracy, we observe a steady increase, culminating in a value of 0.658. This is significantly higher than the baseline, indicating that the method is effective. It’s important to note that each epoch here does not represent the full training data but rather a subset of it. In total, 28% of the available training data was used to train the model.
+
+Due to the constraints of my computational resources and the funds allocated to this project, I had to conclude the training at this point, making this more of a feasibility study. However, if you're interested in continuing the training, the model is available on [Hugging Face](https://huggingface.co/minhaozhang/Phi-3-mini-4k-instruct-mbti-JP).
 
 ## Thoughts and Future Work
 
 ### Thoughts
 
-MBTI classification based on text data presents unique challenges that set it apart from more straightforward tasks like sentiment analysis. Unlike sentiment, which often has clear indicators within the text (e.g., specific keywords or phrases), MBTI classification requires deeper analysis of context, speech habits, and the speaker's intentions. This subtlety makes it difficult even for advanced models to accurately predict personality types. The task demands a nuanced understanding of language and behavior, which LLMs might still struggle to fully grasp.
+MBTI classification based on text data presents unique challenges that distinguish it from more straightforward tasks like sentiment analysis. Unlike sentiment, which often has clear indicators within the text (e.g., specific keywords or phrases), MBTI classification requires a deeper understanding of context, speech patterns, and the speaker's intentions. This subtle complexity makes it difficult for even advanced models to accurately predict personality types. The task demands a nuanced comprehension of language and behavior, which large language models (LLMs) may still struggle to fully grasp.
 
 ### Future Work
 
-There are several areas where this project could be further improved:
+There are several areas where this project could be further enhanced:
 
-1. **Use a Better and Longer Dataset**:
-   - In this project, each post was limited to around 200-400 words to maintain a large enough dataset. However, longer texts could potentially provide more context and thus be more informative for the model. Combining shorter texts into longer ones could decrease the number of samples, but it might also introduce biases if many long posts are authored by the same individuals. A better dataset with longer posts and more diverse samples would likely enhance the model's performance. 
+1. **Assumption of Independence Among MBTI Dimensions**:
+   - In the current approach, each MBTI dimension was treated as a separate binary classification task, assuming independence among the dimensions. However, this may not reflect reality, as there could be correlations between different dimensions that, if leveraged, could improve classification accuracy. Future work could explore multi-label classification or other methods that consider the interrelationships between MBTI dimensions.
 
-1. **Use a Better LLM Model**:
-   - While Phi-3 is a relatively new and promising model, it's still comparatively small, with 3.8 billion parameters and a 4k token context. Larger state-of-the-art models, like Llama3.1, which can have up to 405 billion parameters and 128k token context, might be better suited for this task. These larger models could extract more nuanced information from the text and potentially deliver better performance. Unfortunately, due to computational constraints, fine-tuning such large models was not feasible in this project.
+2. **Utilizing a More Powerful LLM**:
+   - While Phi-3 is a promising model with 3.8 billion parameters and a 4k token context, larger state-of-the-art models like Llama3.1, which boasts up to 405 billion parameters and a 128k token context, may be better suited for this task. These larger models could capture more nuanced information from the text, potentially leading to improved performance. However, due to computational constraints, fine-tuning such large models was beyond the scope of this project.
 
-2. **Use a Better Fine-Tuning Strategy**:
-   - The current approach utilized the `AutoModelForSequenceClassification` from the Hugging Face Transformers library, which is a good starting point. However, a custom training loop using PyTorch might offer more flexibility and allow for fine-tuning that is better tailored to the specific challenges of MBTI classification.
+3. **Employing a More Advanced Fine-Tuning Strategy**:
+   - The current fine-tuning approach utilized the `AutoModelForSequenceClassification` from the Hugging Face Transformers library, which serves as a solid foundation. However, developing a custom training loop using PyTorch could offer greater flexibility, allowing for fine-tuning that is more specifically tailored to the challenges of MBTI classification.
 
-3. **Use a Better Data Pre-processing Strategy**:
-   - The data pre-processing strategy employed in this project was straightforward but might not be optimal for this particular task. While common NLP techniques were applied, more sophisticated pre-processing strategies could be developed, potentially incorporating insights from psychology and linguistics. This could involve more nuanced handling of language structures and contextual elements, which might better support the model in recognizing the subtleties of personality types. 
+4. **Improving Data Pre-processing Techniques**:
+   - The data pre-processing strategy used in this project was effective but likely not optimal for this specific task. While common NLP techniques were applied, more sophisticated pre-processing methods could be developed. Incorporating insights from psychology and linguistics could lead to more nuanced handling of language structures and contextual elements, better supporting the model in capturing the subtleties of personality types.
 
 ## References
 
