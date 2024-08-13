@@ -4,3 +4,5 @@ python-dotenv
 datasets 
 transformers
 evaluate 
+accelerate
+pytorch

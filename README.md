@@ -5,6 +5,7 @@ Classifying someone's MBTI type based on their text data.
 此文章有[中文版本](./README_ZH.md)。
 
 - [MBTI Classification - A Feasibility Study](#mbti-classification---a-feasibility-study)
+  - [Try it out](#try-it-out)
   - [Data Preparation](#data-preparation)
     - [Data Curation](#data-curation)
     - [Data Summary](#data-summary)
@@ -30,6 +31,36 @@ Classifying someone's MBTI type based on their text data.
     - [Future Work](#future-work)
   - [References](#references)
 
+## Try it out 
+
+If you plan to try machine learning models, you can install the required packages under the `ml` directory:
+
+```bash
+pip install -r ml/requirements.txt
+```
+
+Then, execute the following command to tokenize and apply word2vec on the input:
+
+```bash
+python tokenize_data.py
+python train_word2vec.py
+python apply_word2vec.py
+python train_test_split_for_ml.py
+```
+
+Then you can just run the [train_model.ipynb](./ml/train_model.ipynb) notebook.
+
+---
+
+If you plan to fine-tune a large language model, you can install the required packages under the `llm` directory:
+
+```bash
+pip install -r llm/requirements.txt
+```
+
+Then, you just need to check out [tune-phi3-mini-weight-balancing.ipynb](./llm/tune-phi3-mini-weight-balancing.ipynb) and follow the instructions. 
+
+Note, you will need one or more GPU. Out of the box, the training parameters are set up to use an A100 GPU with 80GB of vRAM. With this setup, you will probably need about 100 hours of compute to complete the training and evaluation process. So if you want to train all 4 dimensions, you will need about 400 hours. 
 
 
 ## Data Preparation
@@ -301,7 +332,7 @@ Due to the constraints of my computational resources and the funds allocated to 
 
 ### Thoughts
 
-MBTI classification based on text data presents unique challenges that distinguish it from more straightforward tasks like sentiment analysis. Unlike sentiment, which often has clear indicators within the text (e.g., specific keywords or phrases), MBTI classification requires a deeper understanding of context, speech patterns, and the speaker's intentions. This subtle complexity makes it difficult for even advanced models to accurately predict personality types. The task demands a nuanced comprehension of language and behavior, which large language models (LLMs) may still struggle to fully grasp.
+MBTI classification based on text data presents unique challenges that distinguish it from more straightforward tasks like sentiment analysis. Unlike sentiment, which often has clear indicators within the text (e.g., specific keywords or phrases), MBTI classification requires a deeper understanding of context, speech patterns, and the speaker's intentions. This subtle complexity makes it difficult for even advanced models to accurately predict personality types. However, the results in the later stage of the project shows promising result of LLM distinguishing the J-P type. With more computational power and more data, it is highly likely that LLM will ultimately learn to predict someone's MBTI based on their text data. 
 
 ### Future Work
 

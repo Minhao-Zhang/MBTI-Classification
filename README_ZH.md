@@ -5,6 +5,7 @@
 There is also an [English version](./README.md) of this document.
 
 - [MBTI分类 - 可行性研究](#mbti分类---可行性研究)
+  - [试试看](#试试看)
   - [数据准备](#数据准备)
     - [数据整理](#数据整理)
     - [数据摘要](#数据摘要)
@@ -29,6 +30,37 @@ There is also an [English version](./README.md) of this document.
     - [想法](#想法)
     - [未来工作](#未来工作)
   - [参考文献](#参考文献)
+
+## 试试看
+
+如果你打算尝试机器学习模型，可以先在 `ml` 目录下安装所需的依赖包：
+
+```bash
+pip install -r ml/requirements.txt
+```
+
+接着，运行以下命令，对输入数据进行分词并应用 Word2Vec：
+
+```bash
+python tokenize_data.py
+python train_word2vec.py
+python apply_word2vec.py
+python train_test_split_for_ml.py
+```
+
+之后，你可以直接运行 [train_model.ipynb](./ml/train_model.ipynb) 这个 notebook。
+
+---
+
+如果你打算微调一个大型语言模型，可以在 `llm` 目录下安装所需的依赖包：
+
+```bash
+pip install -r llm/requirements.txt
+```
+
+然后，按照 [tune-phi3-mini-weight-balancing.ipynb](./llm/tune-phi3-mini-weight-balancing.ipynb) 中的说明进行操作即可。
+
+注意，你将需要一块或多块 GPU。默认情况下，训练参数设置为使用一块具有 80GB 显存的 A100 GPU。在这种配置下，完成训练和评估过程可能需要大约 100 小时的计算时间。因此，如果你想训练所有四个维度，大约需要 400 小时。
 
 
 ## 数据准备
@@ -306,7 +338,7 @@ Ryan等人在2023年的研究中对此进行了深入探索。他们利用Kaggle
 
 ### 想法
 
-基于文本数据的 MBTI 分类面临着独特的挑战，使其有别于情绪分析等更简单的任务。与情绪不同，情绪通常在文本中有明确的指标（例如，特定的关键字或短语），而 MBTI 分类需要更深入地了解上下文、语音模式和说话者的意图。这种微妙的复杂性使得即使是先进的模型也难以准确预测性格类型。这项任务需要对语言和行为有细致入微的理解，而大型语言模型 (LLM) 可能仍难以完全掌握。
+基于文本数据的 MBTI 分类面临着独特的挑战，这些挑战使其不同于情感分析等更为直接的任务。与情感分析不同，后者通常在文本中具有明确的指示（例如特定的关键词或短语），MBTI 分类则需要对上下文、说话方式以及说话者意图有更深入的理解。这种微妙的复杂性使得即使是高级模型也难以准确预测人格类型。然而，项目后期的结果显示，大型语言模型在区分 J-P 类型方面表现出令人鼓舞的结果。随着计算能力的提升和数据量的增加，LLM 很可能最终能够基于文本数据准确预测一个人的 MBTI 类型。
 
 ### 未来工作
 该项目有几个方面可以进一步改进：
