@@ -1,4 +1,4 @@
-# How to train a Text Classification model with LLMs
+# How to fine tune LLMs to classify MBTI based on text data
 
 ## Introduction
 
@@ -266,3 +266,5 @@ If you put everything above into a jupyter notebook, you will see something simi
 ![run screenshot](run_screenshot.png)
 
 With the training loss and validation loss steadily going down, the accuracy is growing up. 
+
+If you want to see the full code, you can find it [here](https://github.com/Minhao-Zhang/MBTI-Classification/)

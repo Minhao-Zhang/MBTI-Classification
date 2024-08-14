@@ -1,4 +1,4 @@
-# 如何使用大语言模型（LLMs）训练文本分类模型
+# 如何微调大语言模型（LLMs）用文本来预测MBTI
 
 ## 介绍
 
@@ -248,3 +248,5 @@ trainer.push_to_hub()
 ![run screenshot](run_screenshot.png)
 
 随着训练损失和验证损失稳步下降，准确率在增长。
+
+如果你想要查看完整的代码，请点击[这里](https://github.com/Minhao-Zhang/MBTI-Classification/)。

@@ -1,10 +1,10 @@
-# MBTI Classification using Text Data with LLMs 
+# Fine-Tuning Large Language Models for MBTI Classification Using Text Data
 
 Classifying someone's MBTI type based on their text data.
 
 此文章有[中文版本](./README_ZH.md)。
 
-- [MBTI Classification using Text Data with LLMs](#mbti-classification-using-text-data-with-llms)
+- [Fine-Tuning Large Language Models for MBTI Classification Using Text Data](#fine-tuning-large-language-models-for-mbti-classification-using-text-data)
   - [Try it out](#try-it-out)
   - [Data Preparation](#data-preparation)
     - [Data Curation](#data-curation)
