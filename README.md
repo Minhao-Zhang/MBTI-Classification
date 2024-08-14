@@ -1,10 +1,10 @@
-# MBTI Classification - A Feasibility Study
+# MBTI Classification using Text Data with LLMs 
 
 Classifying someone's MBTI type based on their text data.
 
 此文章有[中文版本](./README_ZH.md)。
 
-- [MBTI Classification - A Feasibility Study](#mbti-classification---a-feasibility-study)
+- [MBTI Classification using Text Data with LLMs](#mbti-classification-using-text-data-with-llms)
   - [Try it out](#try-it-out)
   - [Data Preparation](#data-preparation)
     - [Data Curation](#data-curation)
@@ -32,6 +32,13 @@ Classifying someone's MBTI type based on their text data.
   - [References](#references)
 
 ## Try it out 
+
+Create a virtual environment and install the required packages:
+
+```bash
+conda create -n mbti python=3.12.4
+conda activate mbti
+```
 
 If you plan to try machine learning models, you can install the required packages under the `ml` directory:
 

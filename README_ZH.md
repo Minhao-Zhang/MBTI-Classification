@@ -1,10 +1,10 @@
-# MBTI分类 - 可行性研究
+# 使用大预言模型对文字数据进行MBTI分类 
 
 基于文本数据对某人的MBTI类型进行分类。
 
 There is also an [English version](./README.md) of this document.
 
-- [MBTI分类 - 可行性研究](#mbti分类---可行性研究)
+- [使用大预言模型对文字数据进行MBTI分类](#使用大预言模型对文字数据进行mbti分类)
   - [试试看](#试试看)
   - [数据准备](#数据准备)
     - [数据整理](#数据整理)
@@ -32,6 +32,14 @@ There is also an [English version](./README.md) of this document.
   - [参考文献](#参考文献)
 
 ## 试试看
+
+创建一个conda环境：
+
+```bash
+conda create -n mbti python=3.12.4
+conda activate mbti
+```
+
 
 如果你打算尝试机器学习模型，可以先在 `ml` 目录下安装所需的依赖包：
 
