@@ -194,6 +194,7 @@ training_args = TrainingArguments(
 - `optim="adamw_bnb_8bit"`：使用AdamW和ByteNetBlock 8位量化，这将减少显存使用量4倍。有关更多信息，请参见[这里](https://huggingface.co/docs/transformers/perf_train_gpu_one#optimizer-choice)。
 - `gradient_accumulation_steps`和`eval_accumulation_steps`有效地将批量大小增加到8。
 - `tf32=True`，使用TensorFloat32进行训练。
+
 ![precision-comparison](float-precision-comparison.png)
 
 从这个可视化图像中可以看到，使用tf32将牺牲精度以换取内存使用。TF32使用19位而不是32位来表示每个浮点数，从而减少了40%的内存使用。根据[NVIDIA](https://blogs.nvidia.com/blog/tensorfloat-32-precision-format/)的研究，使用tf32训练的模型与使用fp32训练的模型性能非常相似。

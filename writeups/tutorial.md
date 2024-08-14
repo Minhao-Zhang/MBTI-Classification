@@ -211,6 +211,7 @@ In this training argument, several methods are used to speed up the training pro
 - `optim="adamw_bnb_8bit"`: use AdamW with ByteNetBlock 8-bit quantization. This will reduce the vRAM usage by 4 times. You can see more information about this [here](https://huggingface.co/docs/transformers/perf_train_gpu_one#optimizer-choice). 
 - `gradient_accumulation_steps` and `eval_accumulation_steps` to effectively increase the batch size to 8. 
 - `tf32=True` to use TensorFloat32 for training.
+
 ![precision-comparison](float-precision-comparison.png)
 
 With this visualization, you can see that using tf32 will sacrifice precision for memory usage. TF32 takes 19 bits instead of 32 bits for each float, thus reducing the memory usage by 40%. According to [NVIDIA](https://blogs.nvidia.com/blog/tensorfloat-32-precision-format/), research has shown that model trained with tf32 and models trained with fp32 perform very similarly. 
