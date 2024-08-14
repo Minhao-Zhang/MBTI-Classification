@@ -92,7 +92,7 @@ mbti_data = mbti_data.class_encode_column("F-T")
 mbti_data = mbti_data.class_encode_column("J-P")
 ```
 
-Since the training split contains about 2.3M rows of data, training on all of them might  Thus, we will be using only 10% of the data for training and 20% of the data for validation.
+Since the training split contains about 2.3M rows of data, training on all of them might  Thus, we will be using only 10% of the data for training and 20% of that data for validation.
 
 ```python
 mbti_data = mbti_data.train_test_split(test_size=0.1, stratify_by_column="mbti", seed=0)
@@ -209,14 +209,14 @@ training_args = TrainingArguments(
 In this training argument, several methods are used to speed up the training process and reduce the memory usage. 
 - batch size is set to 4 to reduce the memory usage.
 - `optim="adamw_bnb_8bit"`: use AdamW with ByteNetBlock 8-bit quantization. This will reduce the vRAM usage by 4 times. You can see more information about this [here](https://huggingface.co/docs/transformers/perf_train_gpu_one#optimizer-choice). 
-- `gradient_accumulation_steps` and `eval_accumulation_steps` to effectively increase the batch size to 8. 
+- `gradient_accumulation_steps=2` and `eval_accumulation_steps=2` to effectively increase the batch size to 8. 
 - `tf32=True` to use TensorFloat32 for training.
 
 ![precision-comparison](float-precision-comparison.png)
 
-With this visualization, you can see that using tf32 will sacrifice precision for memory usage. TF32 takes 19 bits instead of 32 bits for each float, thus reducing the memory usage by 40%. According to [NVIDIA](https://blogs.nvidia.com/blog/tensorfloat-32-precision-format/), research has shown that model trained with tf32 and models trained with fp32 perform very similarly. 
+With this visualization, you can see that using tf32 will sacrifice precision for less memory usage. TF32 takes 19 bits instead of 32 bits for each float, thus reducing the memory usage by 40%. According to [NVIDIA](https://blogs.nvidia.com/blog/tensorfloat-32-precision-format/), research has shown that model trained with tf32 and models trained with fp32 perform very similarly. 
 
-> You can see that we did not use bf16 to fine tune the model. According to the configuration, Phi3 model is actualy trained with bf16. However, due to some reason, the loss will be NaN if we use bf16 in the fine tuning process. 
+> You can see that we did not use bf16 to fine tune the model. According to the model configuration, Phi3 model is actualy trained with bf16. However, due to some unkown reason, the loss will be NaN if we use bf16 in the fine tuning process. 
 
 
 Now, we can define the trainer and start training the model. 
@@ -249,7 +249,7 @@ trainer = CustomTrainer(
 
 Here, we wrote a custom trainer with a special loss function. As we discussed before, our data is not balanced with roughly a 60-40 split. Thus, we use a weight balancing method in order to prevent the model turns into a majority calssifier. 
 
-Finnaly, we can do train the model. 
+Finnaly, we can actually train the model. 
 
 ```python
 trainer.train()
@@ -266,6 +266,6 @@ If you put everything above into a jupyter notebook, you will see something simi
 
 ![run screenshot](run_screenshot.png)
 
-With the training loss and validation loss steadily going down, the accuracy is growing up. 
+With the training loss and validation loss steadily going down, the accuracy is growing up. In the end, the model will be able to classify the J-P aspect of MBTI with a accuracy of 0.65. Though this result is not particularly good, considering we only used 10% of the data and a small model, this is a decent result. You can further improve the model by using more data, a larger model, and more training epochs.
 
 If you want to see the full code, you can find it [here](https://github.com/Minhao-Zhang/MBTI-Classification/)

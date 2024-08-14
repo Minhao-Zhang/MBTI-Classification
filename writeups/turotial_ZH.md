@@ -40,7 +40,7 @@ conda create -n mbti-tuning python=3.12.4
 conda activate mbti-tuning
 ```
 
-接着，我们需要以下库：
+接着，我们需要安装以下库：
 
 ```bash
 pip install numpy scikit-learn python-dotenv datasets transformers evaluate accelerate pytorch
@@ -76,7 +76,7 @@ mbti_data = mbti_data.class_encode_column("F-T")
 mbti_data = mbti_data.class_encode_column("J-P")
 ```
 
-由于训练集包含大约230万行数据，训练所有数据可能会很慢。因此，我们将只使用10%的数据进行训练，20%的数据进行验证。
+由于训练集包含大约230万行数据，训练所有数据可能会很慢。因此，我们将只使用10%的数据进行训练，再使用其20%的数据进行验证。
 
 ```python
 mbti_data = mbti_data.train_test_split(test_size=0.1, stratify_by_column="mbti", seed=0)
@@ -107,7 +107,7 @@ tokenized_mbti_data = mbti_data.map(preprocess_function, batched=True)
 del mbti_data # 节省内存
 ```
 
-为了简化问题，我将只对MBTI的J-P方面进行分类，因为它有一定的不平衡但并没有严重偏斜。在这个数据集中，J-P方面的比例是60-40。因此，我将移除所有其他列。
+为了简化问题，我将只对MBTI的J-P方面进行分类。在这个数据集中，J-P方面的比例是60-40，它有一定的不平衡但并没有严重偏斜。因此，我将移除所有其他列。
 
 ```python
 tokenized_mbti_data = tokenized_mbti_data.remove_columns(['author', 'mbti', 'F-T', "E-I", 'N-S'])
@@ -189,17 +189,17 @@ training_args = TrainingArguments(
 )
 ```
 
-在这些训练参数中，使用了几种方法来加速训练过程并减少内存使用。
+在这些训练参数中，使用了几种方法来加速训练过程并减少内存的使用。
 - 批量大小设置为4，以减少内存使用。
 - `optim="adamw_bnb_8bit"`：使用AdamW和ByteNetBlock 8位量化，这将减少显存使用量4倍。有关更多信息，请参见[这里](https://huggingface.co/docs/transformers/perf_train_gpu_one#optimizer-choice)。
-- `gradient_accumulation_steps`和`eval_accumulation_steps`有效地将批量大小增加到8。
+- `gradient_accumulation_steps=2`和`eval_accumulation_steps=2`有效地将批量大小增加到8。
 - `tf32=True`，使用TensorFloat32进行训练。
 
 ![precision-comparison](float-precision-comparison.png)
 
-从这个可视化图像中可以看到，使用tf32将牺牲精度以换取内存使用。TF32使用19位而不是32位来表示每个浮点数，从而减少了40%的内存使用。根据[NVIDIA](https://blogs.nvidia.com/blog/tensorfloat-32-precision-format/)的研究，使用tf32训练的模型与使用fp32训练的模型性能非常相似。
+从这个图像中可以看到，使用tf32将牺牲精度以换取更小的内存使用率。TF32使用19位而不是32位来表示每个浮点数，从而减少了40%的内存使用。根据[NVIDIA](https://blogs.nvidia.com/blog/tensorfloat-32-precision-format/)的研究，使用tf32训练的模型与使用fp32训练的模型性能非常相似。
 
-> 你可以看到我们没有使用bf16来微调模型。根据配置，Phi3模型实际上是使用bf16进行训练的。然而，由于某些原因，如果在微调过程中使用bf16，损失将变为NaN。
+> 你可以注意到我们没有使用bf16来微调模型。根据模型配置，Phi3模型实际上是使用bf16进行训练的。然而，由于某些未知的原因，如果在微调过程中使用bf16，损失将变为NaN。
 
 现在，我们可以定义训练器并开始训练模型。
 
@@ -231,7 +231,7 @@ trainer = CustomTrainer(
 
 在这里，我们编写了一个具有特殊损失函数的自定义训练器。如前所述，我们的数据不平衡，大致为60-40的比例。因此，我们使用了权重平衡方法，以防止模型变成一个主要分类器。
 
-最后，我们可以训练模型。
+最后，我们终于可以开始训练模型了。
 
 ```python
 trainer.train()
@@ -248,6 +248,6 @@ trainer.push_to_hub()
 
 ![run screenshot](run_screenshot.png)
 
-随着训练损失和验证损失稳步下降，准确率在增长。
+随着训练损失和验证损失稳步下降，准确率在增长。在这个例子中，我们的模型在验证集上达到了约0.65的准确率。这个结果并不是特别好，但考虑到我们只使用了10%的数据和一个小型模型，这是一个不错的结果。如果你想要更好的结果，你可以尝试使用更大的模型、更多的数据和更多的训练时间。
 
 如果你想要查看完整的代码，请点击[这里](https://github.com/Minhao-Zhang/MBTI-Classification/)。
