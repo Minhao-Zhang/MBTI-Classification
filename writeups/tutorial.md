@@ -92,7 +92,7 @@ mbti_data = mbti_data.class_encode_column("F-T")
 mbti_data = mbti_data.class_encode_column("J-P")
 ```
 
-Since the training split contains about 2.3M rows of data, training on all of them might  Thus, we will be using only 10% of the data for training and 20% of that data for validation.
+Since the training split contains about 2.3M rows of data, training on all of them will take too long. Thus, we will be using only 10% of the data for training and 20% of that data for validation.
 
 ```python
 mbti_data = mbti_data.train_test_split(test_size=0.1, stratify_by_column="mbti", seed=0)
