@@ -5,4 +5,6 @@ datasets
 transformers
 evaluate 
 accelerate
-pytorch
+torch
+wandb
+bitsandbytes
