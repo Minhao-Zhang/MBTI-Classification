@@ -1,5 +1,14 @@
 # Fine-Tuning Large Language Models for MBTI Classification Using Text Data
 
+---
+
+I believe I have made a huge mistake in this project.
+The metric I used to test the classication should not be accuracy or f1 score. 
+It should be balanced accuracy or MCC score. 
+I will make adjustment to this project in the near future. 
+
+---
+
 Classifying someone's MBTI type based on their text data.
 
 此文章有[中文版本](./README_ZH.md)。
