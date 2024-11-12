@@ -27,7 +27,7 @@ mbti_data = mbti_data.class_encode_column("J-P")
 # these are only used to test behaviors
 # mbti_data = mbti_data['train'].train_test_split(test_size=0.01, stratify_by_column="mbti", seed=0)
 # mbti_data = mbti_data["test"]
-# mbti_data = mbti_data.train_test_split(test_size=0.1, stratify_by_column="mbti", seed=1)
+# mbti_data = mbti_data.train_test_split(test_size=0.01, stratify_by_column="mbti", seed=1)
 
 
 
@@ -115,20 +115,14 @@ training_args = TrainingArguments(
     eval_strategy="steps",
     save_strategy="steps",
     logging_steps=steps,
-    eval_steps=steps,
+    eval_steps=4*steps,
     save_steps=4*steps,
     load_best_model_at_end=True,
     push_to_hub=True,
     optim="adamw_bnb_8bit",
-    # optim="adafactor",
     eval_accumulation_steps=4,
     gradient_accumulation_steps=4, 
-    # gradient_checkpointing=True,
-    # torch_compile=False,
     bf16=True,
-    # fp32=False
-    # fp16=False,
-    # tf32=True,
 )
 
 from torch import nn
@@ -140,7 +134,8 @@ class CustomTrainer(Trainer):
         # forward pass
         outputs = model(**inputs)
         logits = outputs.get('logits')
-        # compute custom loss
+        
+        # compute weighted loss
         loss_fct = nn.CrossEntropyLoss(weight=torch.tensor([0.6, 0.4]).to('cuda'))
         loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
         return (loss, outputs) if return_outputs else loss
