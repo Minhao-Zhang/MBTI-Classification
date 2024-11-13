@@ -11,6 +11,8 @@ wandb/
 catboost_info/
 docker-compose.yaml
 Dockerfile
+Llama-3.2-3B-Instruct-MBTI-JP/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
