@@ -5,6 +5,5 @@ datasets
 transformers
 evaluate 
 accelerate
-torch
 wandb
 bitsandbytes

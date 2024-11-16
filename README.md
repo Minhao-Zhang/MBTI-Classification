@@ -1,17 +1,8 @@
 # Fine-Tuning Large Language Models for MBTI Classification Using Text Data
 
----
-
-I believe I have made a huge mistake in this project.
-The metric I used to test the classication should not be accuracy or f1 score. 
-It should be balanced accuracy or MCC score. 
-I will make adjustment to this project in the near future. 
-
----
-
 Classifying someone's MBTI type based on their text data.
 
-此文章有[中文版本](./README_ZH.md)。
+<!-- 此文章有[中文版本](./README_ZH.md)。 -->
 
 - [Fine-Tuning Large Language Models for MBTI Classification Using Text Data](#fine-tuning-large-language-models-for-mbti-classification-using-text-data)
   - [Try it out](#try-it-out)
@@ -20,9 +11,10 @@ Classifying someone's MBTI type based on their text data.
     - [Data Summary](#data-summary)
     - [Pre-processing](#pre-processing)
     - [Baseline Score](#baseline-score)
+  - [Choice of Evaluation Metric](#choice-of-evaluation-metric)
   - [Machine Learning Approach](#machine-learning-approach)
     - [Previous Work](#previous-work)
-    - [My Approach](#my-approach)
+    - [Same Approach on my Dataset](#same-approach-on-my-dataset)
   - [Large Language Models Approach](#large-language-models-approach)
     - [Getting Started](#getting-started)
     - [Reducing GPU Memory Usage](#reducing-gpu-memory-usage)
@@ -74,7 +66,7 @@ If you plan to fine-tune a large language model, you can install the required pa
 pip install -r llm/requirements.txt
 ```
 
-Then, you just need to check out [tune-phi3-mini-weight-balancing.ipynb](./llm/tune-phi3-mini-weight-balancing.ipynb) and follow the instructions. 
+Then, you just need to check out several tuning notebook under `llm` and follow the instructions. 
 
 Note, you will need one or more GPU. Out of the box, the training parameters are set up to use an A100 GPU with 80GB of vRAM. With this setup, you will probably need about 100 hours of compute to complete the training and evaluation process. So if you want to train all 4 dimensions, you will need about 400 hours. 
 
@@ -123,12 +115,25 @@ Although using character count helps create a balanced dataset, it may introduce
 
 With the final dataset prepared, we can explore the distribution of MBTI types within it. A majority classifier can be used to establish a baseline performance. Further details are available in [eda.ipynb](./preprocessing/eda.ipynb).
 
-| Type | Accuracy | F1 Score |
-| ---- | -------- | -------- |
-| E-I  | 0.78858  | 0.88179  |
-| N-S  | 0.92603  | 0.96160  |
-| F-T  | 0.53863  | 0.70014  |
-| J-P  | 0.59189  | 0.74363  |
+| Type | Accuracy | F1 Score | Balanced Accuracy | Matthews Correlation Coefficient |
+| ---- | -------- | -------- | ----------------- | -------------------------------- |
+| E-I  | 0.78858  | 0.88179  | 0.5               | 0                                |
+| N-S  | 0.92603  | 0.96160  | 0.5               | 0                                |
+| F-T  | 0.53863  | 0.70014  | 0.5               | 0                                |
+| J-P  | 0.59189  | 0.74363  | 0.5               | 0                                |
+
+
+
+## Choice of Evaluation Metric
+
+There are several metrics that can be used to evaluate the performance of a classification model. In the case of binary classification, there are many options to choose from, but accuracy and F-1 score are the most obvious options. There are more metrics available on the [Evaluation of Binary Classifiers](https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers) wikipedia. 
+
+The most straight-forward metric is accuracy as it is easy to understand and interpret. However, accuracy can be misleading when the classes are imbalanced. For example, if the majority class accounts for 90% of the data, a model that predicts the majority class for all samples will achieve an accuracy of 90%, even though it has not learned anything useful. We could then try a more balanced F-1 score where we take the harmonic mean of precision and recall. This metric is more robust to imbalanced data, but it does not take into account the true negatives. In the case of MBTI classification, the classes are not balanced and we care equally about the true positives and true negatives. Thus, I believe these two are not the best metrics for this task. 
+
+As we wish for good true positive and true negative rates, taking the mean of these two will give balanced accuracy. Another metric that is often used in binary classification tasks is the Matthews correlation coefficient (MCC). This metric takes into account true and false positives and negatives and is generally regarded as a balanced measure that can be used even if the classes are of very different sizes. 
+
+Hence, I chose to use balanced accuracy and MCC as the evaluation metrics for this project.
+
 
 ## Machine Learning Approach 
 
@@ -138,11 +143,10 @@ Various efforts have been made to predict personality traits based on text data,
 
 Ryan et al. utilized a traditional machine learning approach, combining a TF-IDF vectorizer with classifiers like CatBoost and employing the SMOTE technique to balance the data. Despite some improvement with SMOTE, the model's performance remained suboptimal. For example, their best F1 score for the binary classification of I/E was 0.8389. However, given the I/E distribution of 6676/1999, a simple majority classifier could achieve an F1 score of 0.86978, indicating that their model did not outperform this basic benchmark.
 
-### My Approach
+### Same Approach on my Dataset
 
-I replicated Ryan et al.'s (2023) approach using my own cleaned and substantially larger dataset. While I employed a similar data preprocessing strategy, I experimented with several gradient boosting classifiers, including CatBoost, XGBoost, and LightGBM. Despite differences in data distribution, my results were similarly disappointing, with my best F1 score matching that of the majority classifier. The detailed training and evaluation process is documented in [train_model.ipynb](./ml/train_model.ipynb).
+I replicated Ryan et al.'s (2023) approach using my own cleaned and substantially larger dataset. While I employed a similar data preprocessing strategy, I experimented with several gradient boosting classifiers, including CatBoost, XGBoost, and LightGBM. The detailed training and evaluation process is documented in [train_model.ipynb](./ml/train_model.ipynb). Here are the results for the four MBTI dimensions:
 
-These unsatisfactory results may stem from the inherent complexity of MBTI classification or the limitations of traditional machine learning techniques. As a result, I plan to explore the potential of large language models to improve performance.
 
 <table>
   <tr>
@@ -154,67 +158,126 @@ These unsatisfactory results may stem from the inherent complexity of MBTI class
     <th>LightGBM</th>
   </tr>
   <tr>
-    <td rowspan="2">E-I</td>
+    <td rowspan="4">E-I</td>
     <td>Accuracy</td>
     <td>0.7886</td>
     <td>0.7891</td>
-    <td>0.7889</td>
-    <td>0.7890</td>
+    <td>0.5747</td>
+    <td>0.5761</td>
   </tr>
   <tr>
     <td>F1 Score</td>
     <td>0.8818</td>
     <td>0.8819</td>
-    <td>0.8820</td>
-    <td>0.8820</td>
+    <td>0.6810</td>
+    <td>0.6827</td>
   </tr>
   <tr>
-    <td rowspan="2">N-S</td>
+    <td>Balanced Accuracy</td>
+    <td>0.5</td>
+    <td>0.5025</td>
+    <td>0.5734</td>
+    <td>0.5731</td>
+  </tr>
+  <tr>
+    <td>MCC</td>
+    <td>0.0</td>
+    <td>0.0450</td>
+    <td>0.1204</td>
+    <td>0.1199</td>
+  </tr>
+  <tr>
+    <td rowspan="4">N-S</td>
     <td>Accuracy</td>
     <td>0.9260</td>
     <td>0.9263</td>
-    <td>0.9261</td>
-    <td>0.9262</td>
+    <td>0.5812</td>
+    <td>0.5840</td>
   </tr>
   <tr>
     <td>F1 Score</td>
     <td>0.9616</td>
     <td>0.9617</td>
-    <td>0.9616</td>
-    <td>0.9617</td>
+    <td>0.7192</td>
+    <td>0.7218</td>
   </tr>
   <tr>
-    <td rowspan="2">F-T</td>
+    <td>Balanced Accuracy</td>
+    <td>0.5</td>
+    <td>0.5031</td>
+    <td>0.5920</td>
+    <td>0.5917</td>
+  </tr>
+  <tr>
+    <td>MCC</td>
+    <td>0.0</td>
+    <td>0.0629</td>
+    <td>0.0971</td>
+    <td>0.0970</td>
+  </tr>
+  <tr>
+    <td rowspan="4">F-T</td>
     <td>Accuracy</td>
     <td>0.5386</td>
     <td>0.6284</td>
-    <td>0.6248</td>
-    <td>0.6234</td>
+    <td>0.6212</td>
+    <td>0.6204</td>
   </tr>
   <tr>
     <td>F1 Score</td>
     <td>0.7001</td>
     <td>0.6794</td>
-    <td>0.6794</td>
-    <td>0.6781</td>
+    <td>0.6462</td>
+    <td>0.6454</td>
   </tr>
   <tr>
-    <td rowspan="2">J-P</td>
+    <td>Balanced Accuracy</td>
+    <td>0.5</td>
+    <td>0.6199</td>
+    <td>0.6195</td>
+    <td>0.6186</td>
+  </tr>
+  <tr>
+    <td>MCC</td>
+    <td>0.0</td>
+    <td>0.2463</td>
+    <td>0.2387</td>
+    <td>0.2370</td>
+  </tr>
+  <tr>
+    <td rowspan="4">J-P</td>
     <td>Accuracy</td>
     <td>0.5919</td>
     <td>0.6162</td>
-    <td>0.6116</td>
-    <td>0.6116</td>
+    <td>0.5781</td>
+    <td>0.5781</td>
   </tr>
   <tr>
     <td>F1 Score</td>
     <td>0.7436</td>
     <td>0.3248</td>
-    <td>0.2596</td>
-    <td>0.2619</td>
+    <td>0.5182</td>
+    <td>0.5158</td>
+  </tr>
+  <tr>
+    <td>Balanced Accuracy</td>
+    <td>0.5</td>
+    <td>0.5556</td>
+    <td>0.5747</td>
+    <td>0.5739</td>
+  </tr>
+  <tr>
+    <td>MCC</td>
+    <td>0.0</td>
+    <td>0.1490</td>
+    <td>0.1471</td>
+    <td>0.1456</td>
   </tr>
 </table>
 
+To independently verify their method's result, I also included accuracy and F-1 score in the test. The results are similar in their database and mine. The accuracy and F-1 score are similar to the majority classifier baseline score. 
+
+For the two other metrics, the balanced accuracy and MCC, the results are better than the majority classifier baseline score. This indicates that the model is learning something, and making distinctions between the classes. However, I am not satisfied with the results and will try a different approach.
 
 ## Large Language Models Approach
 
