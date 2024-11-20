@@ -275,7 +275,7 @@ I replicated Ryan et al.'s (2023) approach using my own cleaned and substantiall
   </tr>
 </table>
 
-To independently verify their method's result, I also included accuracy and F-1 score in the test. The results are similar in their database and mine. The accuracy and F-1 score are similar to the majority classifier baseline score. 
+To independently verify their method's result, I also included accuracy and F-1 score in the test. The results are similar with comparison to corresponding baseline score. The accuracy and F-1 score are hovering around the majority classifier indicating that I have set up the experiment correctly.
 
 For the two other metrics, the balanced accuracy and MCC, the results are better than the majority classifier baseline score. This indicates that the model is learning something, and making distinctions between the classes. However, I am not satisfied with the results and will try a different approach.
 
@@ -341,7 +341,7 @@ I used a 5% subset of the training split to fine-tune the model.
 
 ![Screenshot](./figs/run_screenshot_2.png)
 
-The model achieved a higher accuracy score, but the F1 score was lower. A significant drop in both accuracy and F1 score occurred around the 8000-step mark, which coincided with the start of a new epoch, suggesting that the model was re-training on the same data. By 9000 steps, the model's training loss had dropped significantly, while the validation loss remained high, indicating clear overfitting. This suggests that limiting training to a single epoch might be necessary, as the model begins to overfit as soon as it encounters the same data again.
+The model achieved a higher accuracy score, but the F1 score was lower. A significant drop in both accuracy and F1 score occurred around the 8000-step mark, which coincided with the start of a new epoch, suggesting that the model was re-training on the same data. By 9000 steps, the model's training loss had dropped significantly, while the validation loss remained high, indicating clear overfit. This suggests that limiting training to a single epoch might be necessary, as the model begins to overfit as soon as it encounters the same data again.
 
 I also attempted to train the model on all other MBTI dimensions, but the results were similarly disappointing.
 
@@ -403,9 +403,9 @@ We can visualize the training process in the following plot:
 
 ![log.png](./figs/log.png)
 
-Focusing on the evaluation accuracy, we observe a steady increase, culminating in a value of 0.658. This is significantly higher than the baseline, indicating that the method is effective. It’s important to note that each epoch here does not represent the full training data but rather a subset of it. In total, 28% of the available training data was used to train the model.
+Focusing on the evaluation accuracy, we observe a steady increase, culminating in a value of 0.658. This is significantly higher than the baseline, indicating that the method is effective. It's important to note that each epoch here does not represent the full training data but rather a subset of it. In total, 28% of the available training data was used to train the model.
 
-Due to the constraints of my computational resources and the funds allocated to this project, I had to conclude the training at this point, making this more of a feasibility study. However, if you're interested in continuing the training, the model is available on [Hugging Face](https://huggingface.co/minhaozhang/Phi-3-mini-4k-instruct-mbti-JP).
+Due to the constraints of my computational resources and the funds allocated to this project, I had to conclude the training at this point, making this more of a feasibility study. However, if you're interested in continuing the training, the model is available on [Hugging Face](https://huggingface.co/minhaozhang/Phi-3-mini-4k-instruct-mbti-JP). 
 
 ## Thoughts and Future Work
 
