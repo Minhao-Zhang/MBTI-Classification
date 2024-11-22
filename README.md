@@ -1,6 +1,9 @@
 # Fine-Tuning Large Language Models for MBTI Classification Using Text Data
 
-Classifying someone's MBTI type based on their text data.
+Classifying someone's MBTI type based on their text data. 
+
+Newest result: Balanced Accuracy increased by 8.7% and MCC increased by 68.1%. 
+See [here](#re-visit-using-a-llama32-model). 
 
 <!-- 此文章有[中文版本](./README_ZH.md)。 -->
 
@@ -27,6 +30,7 @@ Classifying someone's MBTI type based on their text data.
     - [Under-sampling the Majority Class](#under-sampling-the-majority-class)
     - [Synthetic Minority Over-sampling Technique (SMOTE)](#synthetic-minority-over-sampling-technique-smote)
     - [Class Weight Balancing](#class-weight-balancing)
+  - [Re-visit using a Llama3.2 Model](#re-visit-using-a-llama32-model)
   - [Thoughts and Future Work](#thoughts-and-future-work)
     - [Thoughts](#thoughts)
     - [Future Work](#future-work)
@@ -377,35 +381,36 @@ When I used 10% of the training data, the model began to show signs of learning.
 
 ![Screenshot](./figs/run_screenshot_3.png)
 
-The accuracy surpassed that of the majority classifier, which was an encouraging sign. I continued training with an additional 18% of the data, using 1.8% as the evaluation set. The results obtained in the logs were as follows:
-
-```text
-{'loss': 0.6714, 'grad_norm': 5.364511013031006, 'learning_rate': 1.8698086186694442e-05, 'epoch': 0.07}
-{'loss': 0.6658, 'grad_norm': 22.42624855041504, 'learning_rate': 1.7396172373388882e-05, 'epoch': 0.13}
-{'loss': 0.6613, 'grad_norm': 14.555525779724121, 'learning_rate': 1.6094258560083326e-05, 'epoch': 0.2}
-{'loss': 0.6558, 'grad_norm': 24.612394332885742, 'learning_rate': 1.4792344746777764e-05, 'epoch': 0.26}
-{'eval_loss': 0.6462374329566956, 'eval_accuracy': 0.6259446950612221, 'eval_f1': 0.6740354056848205, 'eval_matthews_correlation': 0.2369166100794352, 'eval_runtime': 1751.6386, 'eval_samples_per_second': 38.978, 'eval_steps_per_second': 9.745, 'epoch': 0.26}
-{'loss': 0.6529, 'grad_norm': 9.507387161254883, 'learning_rate': 1.3490430933472205e-05, 'epoch': 0.33}
-{'loss': 0.6435, 'grad_norm': 19.002174377441406, 'learning_rate': 1.2188517120166645e-05, 'epoch': 0.39}
-{'loss': 0.6433, 'grad_norm': 1.6572412252426147, 'learning_rate': 1.0886603306861087e-05, 'epoch': 0.46}
-{'loss': 0.6363, 'grad_norm': 13.904766082763672, 'learning_rate': 9.584689493555527e-06, 'epoch': 0.52}
-{'eval_loss': 0.6292107105255127, 'eval_accuracy': 0.6420118343195266, 'eval_f1': 0.6934557403366193, 'eval_matthews_correlation': 0.26360932965460177, 'eval_runtime': 1750.7546, 'eval_samples_per_second': 38.998, 'eval_steps_per_second': 9.75, 'epoch': 0.52}
-{'loss': 0.6362, 'grad_norm': 16.839187622070312, 'learning_rate': 8.282775680249967e-06, 'epoch': 0.59}
-{'loss': 0.6279, 'grad_norm': 9.333328247070312, 'learning_rate': 6.980861866944409e-06, 'epoch': 0.65}
-{'loss': 0.6225, 'grad_norm': 11.680238723754883, 'learning_rate': 5.67894805363885e-06, 'epoch': 0.72}
-{'eval_loss': 0.6130561232566833, 'eval_accuracy': 0.6583572558439276, 'eval_f1': 0.7098467509204897, 'eval_matthews_correlation': 0.29455154970144476, 'eval_runtime': 1768.5199, 'eval_samples_per_second': 38.606, 'eval_steps_per_second': 9.652, 'epoch': 0.78}
-{'loss': 0.6173, 'grad_norm': 5.525467395782471, 'learning_rate': 3.075120427027731e-06, 'epoch': 0.85}
-{'loss': 0.6145, 'grad_norm': 3.068687915802002, 'learning_rate': 1.7732066137221718e-06, 'epoch': 0.91}
-{'loss': 0.6046, 'grad_norm': 4.138741970062256, 'learning_rate': 4.7129280041661244e-07, 'epoch': 0.98}
-```
-
-We can visualize the training process in the following plot:
+The accuracy surpassed that of the majority classifier, which was an encouraging sign. I continued training with an additional 18% of the data, using 1.8% as the evaluation set. The results can be visualize in the following plot:
 
 ![log.png](./figs/log.png)
 
 Focusing on the evaluation accuracy, we observe a steady increase, culminating in a value of 0.658. This is significantly higher than the baseline, indicating that the method is effective. It's important to note that each epoch here does not represent the full training data but rather a subset of it. In total, 28% of the available training data was used to train the model.
 
-Due to the constraints of my computational resources and the funds allocated to this project, I had to conclude the training at this point, making this more of a feasibility study. However, if you're interested in continuing the training, the model is available on [Hugging Face](https://huggingface.co/minhaozhang/Phi-3-mini-4k-instruct-mbti-JP). 
+<!-- Due to the constraints of my computational resources and the funds allocated to this project, I had to conclude the training at this point, making this more of a feasibility study. However, if you're interested in continuing the training, the model is available on [Hugging Face](https://huggingface.co/minhaozhang/Phi-3-mini-4k-instruct-mbti-JP).  -->
+
+
+## Re-visit using a Llama3.2 Model
+
+With the new release of Llama3.2 model, I re-visited this project. I also came to realization that the previous metric I used to evaluate the model was not the best. See more details in [Choice of Evaluation Metric](#choice-of-evaluation-metric). I decided to use the balanced accuracy and MCC to evaluate the model. I also further optimized the model with change in 
+
+| Method/Tool              | Implementation Details                |
+| ------------------------ | ------------------------------------- |
+| Batch size choice        | Yes, to reduce vRAM usage             |
+| Gradient accumulation    | No, as it decreases training speed    |
+| Mixed precision training | Yes, used `bf16` to reduce VRAM usage |
+
+In addition, I used the full dataset to train the model. I trained the model on the J-P split for one epoch and evaluated the model.The evaluation results are shown below.
+
+
+| Metric                | Baseline | XGBoost | CatBoost | LightGBM | LLM     |
+| --------------------- | -------- | ------- | -------- | -------- | ------- |
+| **Accuracy**          | 0.5919   | 0.6162  | 0.5781   | 0.5781   | 0.60156 |
+| **F1 Score**          | 0.7436   | 0.3248  | 0.5182   | 0.5158   | 0.59718 |
+| **Balanced Accuracy** | 0.5      | 0.5556  | 0.5747   | 0.5739   | 0.62466 |
+| **MCC**               | 0.0      | 0.1490  | 0.1471   | 0.1456   | 0.25041 |
+
+Looking at Balanced Accuracy and MCC, we can see the fine-tuned LLM classifier performs much better than any of the traditional ML models. The Balanced Accuracy increased by 8.7% and MCC increased by 68.1%. 
 
 ## Thoughts and Future Work
 
